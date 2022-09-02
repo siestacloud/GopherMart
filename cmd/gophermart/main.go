@@ -1,7 +1,22 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+
+	"github.com/siestacloud/gopherMart/internal/config"
+)
+
+var (
+	cfg config.Cfg
+)
 
 func main() {
-	fmt.Println("ok")
+
+	err := config.Parse(&cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(cfg)
+
 }
