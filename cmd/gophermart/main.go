@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
+	_ "github.com/lib/pq"
 	"github.com/siestacloud/gopherMart/internal/config"
 	"github.com/siestacloud/gopherMart/internal/repository"
 	"github.com/siestacloud/gopherMart/internal/service"
@@ -19,7 +21,7 @@ var (
 // @version 1.0
 // @description API Server for Template Application
 
-// @host localhost:9999
+// @host localhost:8080
 // @BasePath /
 
 // @securityDefinitions.apikey ApiKeyAuth
@@ -33,6 +35,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// подключение базы
+	fmt.Println(cfg.URLPostgres)
 	db, err := repository.NewPostgresDB(cfg.URLPostgres)
 	if err != nil {
 		logrus.Warnf("failed to initialize postrges: %s", err.Error())

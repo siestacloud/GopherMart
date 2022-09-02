@@ -9,8 +9,17 @@ import (
 )
 
 const (
-	mtrxTable = "mtrx"
+	usersTable = "users"
 )
+
+type Config struct {
+	Host     string
+	Port     string
+	Username string
+	Password string
+	DBName   string
+	SSLMode  string
+}
 
 func NewPostgresDB(urlDB string) (*sqlx.DB, error) {
 	if urlDB == "" {
@@ -28,20 +37,20 @@ func NewPostgresDB(urlDB string) (*sqlx.DB, error) {
 
 	// делаем запрос
 	var checkExist bool
-	row := db.QueryRow("SELECT EXISTS (SELECT FROM pg_tables WHERE  tablename  = 'mtrx');")
+	row := db.QueryRow("SELECT EXISTS (SELECT FROM pg_tables WHERE  tablename  = 'users');")
 	err = row.Scan(&checkExist)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if !checkExist {
-		_, err = db.Exec("CREATE TABLE mtrx (id serial not null unique,name varchar(255) not null unique,type varchar(255) not null,value varchar(255), delta varchar(255) );") //QueryRowContext т.к. одна запись
+		_, err = db.Exec("CREATE TABLE users (id serial not null unique,login varchar(255) not null unique, password_hash varchar(255) not null);") //QueryRowContext т.к. одна запись
 		if err != nil {
 			log.Fatal(err)
 		}
-		logrus.Info("Table mtrx successful create")
+		logrus.Info("Table users successful create")
 
 	} else {
-		logrus.Info("Table mtrx already created")
+		logrus.Info("Table users already created")
 	}
 
 	return db, nil

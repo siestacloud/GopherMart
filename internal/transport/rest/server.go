@@ -104,11 +104,14 @@ func (s *Server) cfgRouter() {
 	// auth.POST("/sign-in", s.h.SignIn()) // ендпоинт Аутентификации
 
 	api := s.e.Group("/api")
-	// api.Use(s.h.UserIdentity) // JWT token auth
 	api.GET("/test/", s.h.Test())
 
-	// lists := api.Group("/lists")
-	// lists.POST("/", s.h.CreateList())
+	// 	* `POST /api/user/register` — регистрация пользователя;
+	// 	* `POST /api/user/login` — аутентификация пользователя;
+	user := api.Group("/user")
+	user.POST("/register", s.h.SignUp())
+	user.POST("/login", s.h.SignIn())
+
 	// lists.GET("/", s.h.GetAllLists())
 
 	// lists = api.Group("/lists")
