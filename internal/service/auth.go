@@ -61,7 +61,7 @@ func (s *AuthService) GenerateToken(login, password string) (string, error) {
 			ExpiresAt: time.Now().Add(tokenTTL).Unix(), // токен перестает быть валидным через
 			IssuedAt:  time.Now().Unix(),
 		},
-		user.Id,
+		user.ID,
 	})
 
 	return token.SignedString([]byte(signingKey))
