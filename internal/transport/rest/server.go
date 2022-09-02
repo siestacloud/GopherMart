@@ -15,7 +15,6 @@ import (
 	"github.com/siestacloud/gopherMart/internal/transport/rest/handler"
 	"github.com/siestacloud/gopherMart/pkg"
 	"github.com/sirupsen/logrus"
-	l "github.com/sirupsen/logrus"
 
 	echoSwagger "github.com/swaggo/echo-swagger" // echo-swagger middleware
 )
@@ -26,7 +25,7 @@ type Server struct {
 	h *handler.Handler
 }
 
-//New return point to new server.
+//NewServer конструктор
 func NewServer(config *config.Cfg, h *handler.Handler) (*Server, error) {
 	return &Server{
 		e: echo.New(),
@@ -75,12 +74,13 @@ func (s *Server) Run() error {
 	return nil
 }
 
+//cfgLogRus настройка logrus
 func (s *Server) cfgLogRus() error {
-	level, err := l.ParseLevel("info")
+	level, err := logrus.ParseLevel("info")
 	if err != nil {
 		return err
 	}
-	l.SetLevel(level)
+	logrus.SetLevel(level)
 	if s.c.Logrus.LogLevel == "debug" {
 		logrus.SetReportCaller(true)
 	}
