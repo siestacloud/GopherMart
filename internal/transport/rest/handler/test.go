@@ -23,6 +23,6 @@ func (h *Handler) Test() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		logrus.Info("Ok")
 		// h.services.Authorization.Test()
-		return c.HTML(http.StatusOK, "OK")
+		return c.String(http.StatusOK, "OK")
 	}
 }
