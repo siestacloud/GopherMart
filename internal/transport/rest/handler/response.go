@@ -9,9 +9,9 @@ type errorResponse struct {
 	Message string `json:"message"`
 }
 
-type statusResponse struct {
-	Status string `json:"status"`
-}
+// type statusResponse struct {
+// 	Status string `json:"status"`
+// }
 
 func errResponse(c echo.Context, statusCode int, message string) error {
 	pkg.ErrPrint("transport", statusCode, message)
