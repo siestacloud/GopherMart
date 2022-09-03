@@ -12,14 +12,21 @@ type Authorization interface {
 	ParseToken(token string) (int, error)
 }
 
+type Order interface {
+	Create(userId int, order core.Order) error
+	GetUserByOrder(order int) (int, error)
+}
+
 // Главный тип слоя SVC, который встраивается как зависимость в слое TRANSPORT
 type Service struct {
 	Authorization
+	Order
 }
 
 // Конструктор слоя SVC
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
+		Order:         NewOrderService(repos.Order),
 	}
 }

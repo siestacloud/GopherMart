@@ -111,8 +111,14 @@ func (s *Server) cfgRouter() {
 	user.POST("/register", s.h.SignUp())
 	user.POST("/login", s.h.SignIn())
 
-	// lists.GET("/", s.h.GetAllLists())
+	// * POST /api/user/orders — загрузка пользователем номера заказа для расчёта;
+	// * GET /api/user/orders — получение списка загруженных пользователем номеров заказов, статусов их обработки и информации о начислениях;
+	orders := user.Group("/orders")
+	orders.Use(s.h.UserIdentity) // JWT token auth
+	orders.POST("", s.h.CreateOrder())
+	orders.GET("", s.h.GetOrders())
 
+	// lists.GET("/", s.h.GetAllLists())
 	// lists = api.Group("/lists")
 	// lists.GET("/:id", s.h.GetListById())
 	// lists.PUT("/:id", s.h.UpdateList())

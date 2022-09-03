@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/sirupsen/logrus"
+	"github.com/siestacloud/gopherMart/pkg"
 )
 
 type errorResponse struct {
@@ -14,6 +14,6 @@ type statusResponse struct {
 }
 
 func errResponse(c echo.Context, statusCode int, message string) error {
-	logrus.WithFields(logrus.Fields{"tag": "layer: transport"}).Info(message)
+	pkg.ErrPrint("transport", statusCode, message)
 	return c.JSON(statusCode, errorResponse{message})
 }

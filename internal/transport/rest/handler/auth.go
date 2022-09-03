@@ -33,14 +33,14 @@ func (h *Handler) SignUp() echo.HandlerFunc {
 		_, err := h.services.Authorization.CreateUser(input)
 		if err != nil {
 			if strings.Contains(err.Error(), "duplicate key value") {
-				return errResponse(c, http.StatusConflict, "")
+				return errResponse(c, http.StatusConflict, err.Error())
 			}
-			return errResponse(c, http.StatusInternalServerError, "")
+			return errResponse(c, http.StatusInternalServerError, err.Error())
 		}
 
 		token, err := h.services.Authorization.GenerateToken(input.Login, input.Password)
 		if err != nil {
-			return errResponse(c, http.StatusInternalServerError, "")
+			return errResponse(c, http.StatusInternalServerError, err.Error())
 		}
 		c.Response().Header().Set("Authorization", "Bearer "+token)
 		return c.NoContent(http.StatusOK)
@@ -68,13 +68,13 @@ func (h *Handler) SignIn() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var input signInInput
 		if err := c.Bind(&input); err != nil {
-			return errResponse(c, http.StatusBadRequest, "")
+			return errResponse(c, http.StatusBadRequest, err.Error())
 		}
 
 		token, err := h.services.Authorization.GenerateToken(input.Login, input.Password)
 		if err != nil {
 			if strings.Contains(err.Error(), "no rows in result set") {
-				return errResponse(c, http.StatusConflict, "")
+				return errResponse(c, http.StatusConflict, err.Error())
 			}
 			return errResponse(c, http.StatusInternalServerError, err.Error())
 		}
