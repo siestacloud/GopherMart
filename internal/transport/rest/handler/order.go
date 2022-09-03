@@ -44,7 +44,7 @@ func (h *Handler) CreateOrder() echo.HandlerFunc {
 				return errResponse(c, http.StatusUnprocessableEntity, err.Error())
 			}
 			if strings.Contains(err.Error(), "user already have order") {
-				return c.JSON(http.StatusOK, statusResponse{"ok"})
+				return c.NoContent(http.StatusOK)
 			}
 			if strings.Contains(err.Error(), "another user already have order") {
 				return errResponse(c, http.StatusConflict, err.Error())
@@ -54,7 +54,7 @@ func (h *Handler) CreateOrder() echo.HandlerFunc {
 
 		pkg.InfoPrint("transport", "order check", order.ID)
 
-		return c.JSON(http.StatusCreated, statusResponse{"ok"})
+		return c.NoContent(http.StatusAccepted)
 	}
 }
 
