@@ -78,8 +78,7 @@ func (h *Handler) SignIn() echo.HandlerFunc {
 			}
 			return errResponse(c, http.StatusInternalServerError, err.Error())
 		}
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"token": token,
-		})
+		c.Response().Header().Set("Authorization", "Bearer "+token)
+		return c.NoContent(http.StatusOK)
 	}
 }
