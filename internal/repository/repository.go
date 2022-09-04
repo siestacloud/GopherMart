@@ -8,7 +8,7 @@ import (
 type Authorization interface {
 	TestDB()
 	CreateUser(user core.User) (int, error)
-	GetUser(username, password string) (core.User, error)
+	GetUser(username, password string) (*core.User, error)
 }
 
 type Order interface {

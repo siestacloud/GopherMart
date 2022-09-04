@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/siestacloud/gopherMart/internal/core"
+	"github.com/siestacloud/gopherMart/pkg"
 
 	"github.com/labstack/echo/v4"
 )
@@ -27,20 +28,31 @@ func (h *Handler) SignUp() echo.HandlerFunc {
 		var input core.User
 
 		if err := c.Bind(&input); err != nil {
-			return errResponse(c, http.StatusBadRequest, "")
+			pkg.ErrPrint("transport", http.StatusBadRequest, err)
+			return errResponse(c, http.StatusBadRequest, "bind body failure")
+		}
+		if err := c.Validate(input); err != nil {
+			pkg.ErrPrint("transport", http.StatusBadRequest, err)
+			return errResponse(c, http.StatusBadRequest, "validate failure")
 		}
 
 		_, err := h.services.Authorization.CreateUser(input)
 		if err != nil {
-			if strings.Contains(err.Error(), "duplicate key value") {
+			if strings.Contains(err.Error(), "the order number has already been uploaded by another user") {
+				pkg.ErrPrint("transport", http.StatusConflict, err)
 				return errResponse(c, http.StatusConflict, err.Error())
 			}
-			return errResponse(c, http.StatusInternalServerError, err.Error())
+
+			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
+			return errResponse(c, http.StatusInternalServerError, "internal server error")
 		}
 
 		token, err := h.services.Authorization.GenerateToken(input.Login, input.Password)
 		if err != nil {
-			return errResponse(c, http.StatusInternalServerError, err.Error())
+
+			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
+			return errResponse(c, http.StatusInternalServerError, "internal server error")
+
 		}
 		c.Response().Header().Set("Authorization", "Bearer "+token)
 		return c.NoContent(http.StatusOK)
@@ -48,8 +60,8 @@ func (h *Handler) SignUp() echo.HandlerFunc {
 }
 
 type signInInput struct {
-	Login    string `json:"login" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Login    string `json:"login" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 
 // @Summary SignIn
@@ -68,15 +80,22 @@ func (h *Handler) SignIn() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var input signInInput
 		if err := c.Bind(&input); err != nil {
-			return errResponse(c, http.StatusBadRequest, err.Error())
+			pkg.ErrPrint("transport", http.StatusBadRequest, err)
+			return errResponse(c, http.StatusBadRequest, "bind body failure")
 		}
-
+		if err := c.Validate(input); err != nil {
+			pkg.ErrPrint("transport", http.StatusBadRequest, err)
+			return errResponse(c, http.StatusBadRequest, "validate failure")
+		}
 		token, err := h.services.Authorization.GenerateToken(input.Login, input.Password)
 		if err != nil {
-			if strings.Contains(err.Error(), "no rows in result set") {
-				return errResponse(c, http.StatusConflict, err.Error())
+			if strings.Contains(err.Error(), "invalid username/password pair") {
+				pkg.ErrPrint("transport", http.StatusBadRequest, err)
+				return errResponse(c, http.StatusUnauthorized, err.Error())
 			}
-			return errResponse(c, http.StatusInternalServerError, err.Error())
+
+			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
+			return errResponse(c, http.StatusInternalServerError, "internal server error")
 		}
 		c.Response().Header().Set("Authorization", "Bearer "+token)
 		return c.NoContent(http.StatusOK)

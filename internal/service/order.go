@@ -42,7 +42,7 @@ func (o *OrderService) Create(userID int, order core.Order) error {
 		return errors.New("user already have order")
 	}
 
-	return errors.New("another user already have order")
+	return errors.New("another user order")
 
 }
 
