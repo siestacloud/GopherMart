@@ -24,10 +24,7 @@ import (
 // @Failure default {object} errorResponse
 // @Router /api/user/orders [post]
 func (h *Handler) CreateOrder() echo.HandlerFunc {
-	const (
-		authorizationHeader = "Authorization"
-		userCtx             = "userId"
-	)
+
 	return func(c echo.Context) error {
 		userID, err := getUserId(c)
 		if err != nil {
