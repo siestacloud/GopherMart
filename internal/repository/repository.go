@@ -5,6 +5,8 @@ import (
 	"github.com/siestacloud/gopherMart/internal/core"
 )
 
+//go:generate mockgen -source=repository.go -destination=mocks/mock.go
+
 type Authorization interface {
 	TestDB()
 	CreateUser(user core.User) (int, error)
