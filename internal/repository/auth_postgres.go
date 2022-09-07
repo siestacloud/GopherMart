@@ -36,7 +36,7 @@ func (r *AuthPostgres) CreateUser(user core.User) (int, error) {
 	row := r.db.QueryRow(query, user.Login, user.Password)
 	if err := row.Scan(&id); err != nil {
 		pkg.ErrPrint("repository", 409, err)
-		return 0, errors.New("the order number has already been uploaded by another user")
+		return 0, errors.New("login busy")
 	}
 	return id, nil
 }

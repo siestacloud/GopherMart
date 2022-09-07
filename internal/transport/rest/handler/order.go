@@ -73,6 +73,7 @@ func (h *Handler) CreateOrder() echo.HandlerFunc {
 	}
 }
 
+// * Получение списка полученных номеров заказов
 // @Summary GetOrder
 // @Security ApiKeyAuth
 // @Tags Order

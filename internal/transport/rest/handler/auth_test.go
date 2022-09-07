@@ -54,17 +54,17 @@ func TestHandler_SignUp(t *testing.T) {
 		// ! проверка негативных сценариев
 		{
 			// * логин занят
-			name:      "login bisy",
+			name:      "login busy",
 			inputBody: `{"login": "poul2","password": "pass"}`,
 			inputUser: core.User{
 				Login:    "poul2",
 				Password: "pass",
 			},
 			mockBehavior: func(r *service_mocks.MockAuthorization, user core.User) {
-				r.EXPECT().CreateUser(user).Return(0, errors.New("the order number has already been uploaded by another user"))
+				r.EXPECT().CreateUser(user).Return(0, errors.New("login busy"))
 			},
 			expectedStatusCode:   409,
-			expectedResponseBody: `{"message":"the order number has already been uploaded by another user"}` + "\n",
+			expectedResponseBody: `{"message":"login busy"}` + "\n",
 		},
 
 		{

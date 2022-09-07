@@ -38,7 +38,7 @@ func (h *Handler) SignUp() echo.HandlerFunc {
 
 		_, err := h.services.Authorization.CreateUser(input)
 		if err != nil {
-			if strings.Contains(err.Error(), "the order number has already been uploaded by another user") {
+			if strings.Contains(err.Error(), "login busy") {
 				pkg.ErrPrint("transport", http.StatusConflict, err)
 				return errResponse(c, http.StatusConflict, err.Error())
 			}

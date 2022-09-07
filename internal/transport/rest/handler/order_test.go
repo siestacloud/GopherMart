@@ -48,7 +48,7 @@ func TestHandler_CreateOrder(t *testing.T) {
 			expectedResponseBody: ``,
 		},
 		{
-			// * номер заказа уже ьыл загружен этим клиентом
+			// * номер заказа уже был загружен этим клиентом
 			name:       "Ok",
 			userID:     1,
 			inputBody:  `10000000`,
@@ -145,7 +145,7 @@ func TestHandler_CreateOrder(t *testing.T) {
 			order := service_mocks.NewMockOrder(c)
 
 			// * в данном тестовом сценарии ожидаем получить
-			// * вызов метода сервиса и получить в качестве аргумента данную структуру пользователя
+			// * вызов метода сервиса и получить в качестве аргумента данную структуру
 			test.mockBehavior(order, test.userID, test.inputOrder)
 
 			// * инициализируем слой service, имплементируем интерфейс Authorization моком auth
