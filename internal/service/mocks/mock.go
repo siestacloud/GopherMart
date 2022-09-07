@@ -141,3 +141,18 @@ func (mr *MockOrderMockRecorder) GetUserByOrder(order interface{}) *gomock.Call 
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByOrder", reflect.TypeOf((*MockOrder)(nil).GetUserByOrder), order)
 }
+
+// GetListOrders mocks base method
+func (m *MockOrder) GetListOrders(order int) ([]core.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetListOrders", order)
+	ret0, _ := ret[0].([]core.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetListOrders indicates an expected call of GetListOrders
+func (mr *MockOrderMockRecorder) GetListOrders(order interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetListOrders", reflect.TypeOf((*MockOrder)(nil).GetListOrders), order)
+}

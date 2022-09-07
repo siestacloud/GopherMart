@@ -14,8 +14,9 @@ type Authorization interface {
 }
 
 type Order interface {
-	Create(userId int, order core.Order) error
+	Create(userId int, order core.Order, status, createTime string) error
 	GetUserByOrder(order int) (int, error)
+	GetListOrders(userID int) ([]core.Order, error)
 }
 
 // Главный тип слоя repository, который встраивается как зависимость в слое SVC

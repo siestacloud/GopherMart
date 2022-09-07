@@ -17,6 +17,7 @@ type Authorization interface {
 type Order interface {
 	Create(userId int, order core.Order) error
 	GetUserByOrder(order int) (int, error)
+	GetListOrders(userID int) ([]core.Order, error)
 }
 
 // Главный тип слоя SVC, который встраивается как зависимость в слое TRANSPORT

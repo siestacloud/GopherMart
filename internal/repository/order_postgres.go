@@ -6,6 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/siestacloud/gopherMart/internal/core"
+	"github.com/siestacloud/gopherMart/pkg"
 )
 
 // TodoOrderPostgres
@@ -21,7 +22,7 @@ func NewOrderPostgres(db *sqlx.DB) *OrderPostgres {
 }
 
 // Пример обращения к БД в качестве транзакции
-func (o *OrderPostgres) Create(userId int, order core.Order) error {
+func (o *OrderPostgres) Create(userId int, order core.Order, status, createTime string) error {
 	if o.db == nil {
 		return errors.New("database are not connected")
 	}
@@ -30,8 +31,8 @@ func (o *OrderPostgres) Create(userId int, order core.Order) error {
 		return err
 	}
 	var id int
-	createListQuery := fmt.Sprintf("INSERT INTO %s (user_order) VALUES ($1) RETURNING id", ordersTable)
-	row := tx.QueryRow(createListQuery, order.ID)
+	createListQuery := fmt.Sprintf("INSERT INTO %s (user_order,status,create_time) VALUES ($1,$2,$3) RETURNING id", ordersTable)
+	row := tx.QueryRow(createListQuery, order.ID, status, createTime)
 	if err := row.Scan(&id); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
@@ -69,4 +70,18 @@ func (o *OrderPostgres) GetUserByOrder(order int) (int, error) {
 	}
 
 	return userID, nil
+}
+
+// GetByNameType Получаю список заказов клиента
+func (o *OrderPostgres) GetListOrders(userID int) ([]core.Order, error) {
+	if o.db == nil {
+		return nil, errors.New("database are not connected")
+	}
+	orderList := []core.Order{}
+	query := fmt.Sprintf(`SELECT user_order, status, create_time FROM %s `, ordersTable)
+	if err := o.db.Select(&orderList, query); err != nil {
+		pkg.ErrPrint("repository", 204, err)
+		return nil, err
+	}
+	return orderList, nil
 }

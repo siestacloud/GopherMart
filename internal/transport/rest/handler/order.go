@@ -54,7 +54,7 @@ func (h *Handler) CreateOrder() echo.HandlerFunc {
 		if err := h.services.Order.Create(userID, order); err != nil {
 			if strings.Contains(err.Error(), "lune") {
 				pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
-				return errResponse(c, http.StatusUnprocessableEntity, "order format failure")
+				return errResponse(c, http.StatusUnprocessableEntity, err.Error())
 			}
 			if strings.Contains(err.Error(), "user already have order") {
 				pkg.InfoPrint("transport", "ok", err)
@@ -88,6 +88,26 @@ func (h *Handler) CreateOrder() echo.HandlerFunc {
 // @Router /api/user/orders [get]
 func (h *Handler) GetOrders() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusOK)
+		userID, err := getUserId(c)
+		if err != nil {
+
+			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
+			return errResponse(c, http.StatusInternalServerError, err.Error()) // в контексте нет id пользователя
+		}
+		orderList, err := h.services.GetListOrders(userID)
+		if err != nil {
+
+			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
+			return errResponse(c, http.StatusInternalServerError, "internal server error")
+		}
+
+		if len(orderList) == 0 {
+			pkg.ErrPrint("transport", http.StatusNoContent, "no data to answer")
+			return errResponse(c, http.StatusNoContent, "")
+		}
+
+		pkg.InfoPrint("transport", "OK", orderList)
+		return c.JSON(http.StatusOK, orderList)
+
 	}
 }
