@@ -1,8 +1,20 @@
 package pkg
 
+import (
+	"errors"
+	"strconv"
+)
+
 // Valid check number is valid or not based on Luhn algorithm
-func Valid(number int) bool {
-	return (number%10+checksum(number/10))%10 == 0
+func Valid(number string) error {
+	val, err := strconv.Atoi(number)
+	if err != nil {
+		return err
+	}
+	if !((val%10+checksum(val/10))%10 == 0) {
+		return errors.New("lune alg invalid order")
+	}
+	return nil
 }
 
 func checksum(number int) int {

@@ -51,7 +51,7 @@ func (o *OrderPostgres) Create(userId int, order core.Order, status, createTime 
 }
 
 // GetByNameType Получаю user из базы
-func (o *OrderPostgres) GetUserByOrder(order int) (int, error) {
+func (o *OrderPostgres) GetUserByOrder(order string) (int, error) {
 	if o.db == nil {
 		return 0, errors.New("database are not connected")
 	}

@@ -32,10 +32,11 @@ func NewOrderService(repo repository.Order) *OrderService {
 
 //Create проверка номера заказа по алгоритму ЛУНА и сохранение его в базе (с привязкой к конкретному пользователю)
 func (o *OrderService) Create(userID int, order core.Order) error {
+
 	// * проверка номера заказа по алгоритму Луна
-	if !pkg.Valid(order.ID) {
-		pkg.WarnPrint("service", "lune alg err", "invalid order")
-		return errors.New("lune alg invalid order")
+	if err := pkg.Valid(order.ID); err != nil {
+		pkg.WarnPrint("service", "lune alg err", err)
+		return err
 	}
 
 	userDB, err := o.repo.GetUserByOrder(order.ID) // * попытка определить клиента по номеру заказа
@@ -58,7 +59,7 @@ func (o *OrderService) Create(userID int, order core.Order) error {
 
 }
 
-func (o *OrderService) GetUserByOrder(order int) (int, error) {
+func (o *OrderService) GetUserByOrder(order string) (int, error) {
 	return o.repo.GetUserByOrder(order)
 }
 

@@ -3,7 +3,6 @@ package handler
 import (
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -40,15 +39,15 @@ func (h *Handler) CreateOrder() echo.HandlerFunc {
 			return errResponse(c, http.StatusBadRequest, "bad request")
 		}
 
-		order.ID, err = strconv.Atoi(string(body))
-		if err != nil {
-			pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
-			return errResponse(c, http.StatusUnprocessableEntity, "order format failure")
-		}
+		order.ID = string(body)
+		// if err != nil {
+		// 	pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
+		// 	return errResponse(c, http.StatusUnprocessableEntity, "order format failure")
+		// }
 
 		if err := c.Validate(order); err != nil {
-			pkg.ErrPrint("transport", http.StatusBadRequest, err)
-			return errResponse(c, http.StatusBadRequest, "validate failure")
+			pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
+			return errResponse(c, http.StatusUnprocessableEntity, "order format failure")
 		}
 
 		if err := h.services.Order.Create(userID, order); err != nil {

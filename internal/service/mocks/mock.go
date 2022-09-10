@@ -128,31 +128,31 @@ func (mr *MockOrderMockRecorder) Create(userId, order interface{}) *gomock.Call 
 }
 
 // GetUserByOrder mocks base method
-func (m *MockOrder) GetUserByOrder(order int) (int, error) {
+func (m *MockOrder) GetUserByOrder(orderID string) (int, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserByOrder", order)
+	ret := m.ctrl.Call(m, "GetUserByOrder", orderID)
 	ret0, _ := ret[0].(int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetUserByOrder indicates an expected call of GetUserByOrder
-func (mr *MockOrderMockRecorder) GetUserByOrder(order interface{}) *gomock.Call {
+func (mr *MockOrderMockRecorder) GetUserByOrder(orderID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByOrder", reflect.TypeOf((*MockOrder)(nil).GetUserByOrder), order)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByOrder", reflect.TypeOf((*MockOrder)(nil).GetUserByOrder), orderID)
 }
 
 // GetListOrders mocks base method
-func (m *MockOrder) GetListOrders(order int) ([]core.Order, error) {
+func (m *MockOrder) GetListOrders(userID int) ([]core.Order, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetListOrders", order)
+	ret := m.ctrl.Call(m, "GetListOrders", userID)
 	ret0, _ := ret[0].([]core.Order)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetListOrders indicates an expected call of GetListOrders
-func (mr *MockOrderMockRecorder) GetListOrders(order interface{}) *gomock.Call {
+func (mr *MockOrderMockRecorder) GetListOrders(userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetListOrders", reflect.TypeOf((*MockOrder)(nil).GetListOrders), order)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetListOrders", reflect.TypeOf((*MockOrder)(nil).GetListOrders), userID)
 }

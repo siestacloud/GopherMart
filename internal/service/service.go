@@ -15,8 +15,8 @@ type Authorization interface {
 }
 
 type Order interface {
-	Create(userId int, order core.Order) error
-	GetUserByOrder(order int) (int, error)
+	Create(userID int, order core.Order) error
+	GetUserByOrder(orderID string) (int, error)
 	GetListOrders(userID int) ([]core.Order, error)
 }
 

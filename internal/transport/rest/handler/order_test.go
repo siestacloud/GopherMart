@@ -39,7 +39,7 @@ func TestHandler_CreateOrder(t *testing.T) {
 			userID:    1,
 			inputBody: `4561261212345467`,
 			inputOrder: core.Order{
-				ID: 4561261212345467,
+				ID: "4561261212345467",
 			},
 			mockBehavior: func(r *service_mocks.MockOrder, UserID int, order core.Order) {
 				r.EXPECT().Create(UserID, order).Return(nil)
@@ -52,7 +52,7 @@ func TestHandler_CreateOrder(t *testing.T) {
 			name:       "Ok",
 			userID:     1,
 			inputBody:  `10000000`,
-			inputOrder: core.Order{ID: 10000000},
+			inputOrder: core.Order{ID: "10000000"},
 			mockBehavior: func(r *service_mocks.MockOrder, UserID int, order core.Order) {
 				r.EXPECT().Create(UserID, order).Return(errors.New("user already have order"))
 			},
@@ -65,7 +65,7 @@ func TestHandler_CreateOrder(t *testing.T) {
 			name:                 "empty client body",
 			userID:               1,
 			inputBody:            ``,
-			inputOrder:           core.Order{ID: 0},
+			inputOrder:           core.Order{ID: ""},
 			mockBehavior:         func(r *service_mocks.MockOrder, UserID int, order core.Order) {},
 			expectedStatusCode:   422,
 			expectedResponseBody: `{"message":"order format failure"}` + "\n",
@@ -75,7 +75,7 @@ func TestHandler_CreateOrder(t *testing.T) {
 			name:                 "some text in client body",
 			userID:               1,
 			inputBody:            `hello I,m hacking your order system!!!`,
-			inputOrder:           core.Order{ID: 0},
+			inputOrder:           core.Order{ID: ""},
 			mockBehavior:         func(r *service_mocks.MockOrder, UserID int, order core.Order) {},
 			expectedStatusCode:   422,
 			expectedResponseBody: `{"message":"order format failure"}` + "\n",
@@ -85,7 +85,7 @@ func TestHandler_CreateOrder(t *testing.T) {
 			name:                 `json in client body`,
 			userID:               717,
 			inputBody:            `{"hackJSON": "//0213ddsd2/dsd","0_0": "HackScripts[<djsldnas><>]"}`,
-			inputOrder:           core.Order{ID: 0},
+			inputOrder:           core.Order{ID: ""},
 			mockBehavior:         func(r *service_mocks.MockOrder, UserID int, order core.Order) {},
 			expectedStatusCode:   422,
 			expectedResponseBody: `{"message":"order format failure"}` + "\n",
@@ -95,17 +95,17 @@ func TestHandler_CreateOrder(t *testing.T) {
 			name:                 "0s client body",
 			userID:               717,
 			inputBody:            `000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000`,
-			inputOrder:           core.Order{ID: 0},
+			inputOrder:           core.Order{ID: ""},
 			mockBehavior:         func(r *service_mocks.MockOrder, UserID int, order core.Order) {},
-			expectedStatusCode:   400,
-			expectedResponseBody: `{"message":"validate failure"}` + "\n",
+			expectedStatusCode:   422,
+			expectedResponseBody: `{"message":"order format failure"}` + "\n",
 		},
 		{
 			// * номер заказа уже был загружен другим клиентом
 			name:       "Order another user",
 			userID:     1,
 			inputBody:  `4561261212345467`,
-			inputOrder: core.Order{ID: 4561261212345467},
+			inputOrder: core.Order{ID: "4561261212345467"},
 			mockBehavior: func(r *service_mocks.MockOrder, UserID int, order core.Order) {
 				r.EXPECT().Create(UserID, order).Return(errors.New("another user order"))
 			},
@@ -117,7 +117,7 @@ func TestHandler_CreateOrder(t *testing.T) {
 			name:       "Internal server error",
 			userID:     1,
 			inputBody:  `4561261212345467`,
-			inputOrder: core.Order{ID: 4561261212345467},
+			inputOrder: core.Order{ID: "4561261212345467"},
 			mockBehavior: func(r *service_mocks.MockOrder, UserID int, order core.Order) {
 				r.EXPECT().Create(UserID, order).Return(errors.New("some err in service or repository layers..."))
 			},
