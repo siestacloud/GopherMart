@@ -1,7 +1,9 @@
 package service
 
 import (
+	"github.com/siestacloud/gopherMart/internal/config"
 	"github.com/siestacloud/gopherMart/internal/core"
+
 	"github.com/siestacloud/gopherMart/internal/repository"
 )
 
@@ -27,9 +29,9 @@ type Service struct {
 }
 
 // Конструктор слоя SVC
-func NewService(repos *repository.Repository) *Service {
+func NewService(cfg *config.Cfg, repos *repository.Repository) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
-		Order:         NewOrderService(repos.Order),
+		Order:         NewOrderService(cfg, repos.Order),
 	}
 }

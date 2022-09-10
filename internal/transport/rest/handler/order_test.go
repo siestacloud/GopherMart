@@ -10,7 +10,6 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
-	"github.com/siestacloud/gopherMart/internal/config"
 	"github.com/siestacloud/gopherMart/internal/core"
 	"github.com/siestacloud/gopherMart/internal/service"
 	service_mocks "github.com/siestacloud/gopherMart/internal/service/mocks"
@@ -150,7 +149,7 @@ func TestHandler_CreateOrder(t *testing.T) {
 
 			// * инициализируем слой service, имплементируем интерфейс Authorization моком auth
 			services := &service.Service{Order: order}
-			handler := NewHandler(&config.Cfg{}, services)
+			handler := NewHandler(services)
 
 			// * инициализация тестового ендпоитна
 			e := echo.New()

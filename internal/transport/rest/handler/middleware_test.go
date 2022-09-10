@@ -8,7 +8,6 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
-	"github.com/siestacloud/gopherMart/internal/config"
 	"github.com/siestacloud/gopherMart/internal/service"
 	service_mocks "github.com/siestacloud/gopherMart/internal/service/mocks"
 	"github.com/stretchr/testify/assert"
@@ -102,7 +101,7 @@ func TestHandler_userIdentity(t *testing.T) {
 
 			// * инициализируем слой service, имплементируем интерфейс Authorization моком auth
 			services := &service.Service{Authorization: auth}
-			handler := NewHandler(&config.Cfg{}, services)
+			handler := NewHandler(services)
 
 			// * инициализация тестового ендпоитна
 			e := echo.New()

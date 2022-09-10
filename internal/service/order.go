@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/siestacloud/gopherMart/internal/config"
 	"github.com/siestacloud/gopherMart/internal/core"
 	"github.com/siestacloud/gopherMart/internal/repository"
 	"github.com/siestacloud/gopherMart/pkg"
@@ -24,12 +25,15 @@ const (
 
 // OrderService реализация бизнес логики обработки номера заказа
 type OrderService struct {
+	cfg *config.Cfg
+
 	repo repository.Order
 }
 
 //NewOrderService конструктор
-func NewOrderService(repo repository.Order) *OrderService {
+func NewOrderService(cfg *config.Cfg, repo repository.Order) *OrderService {
 	return &OrderService{
+		cfg:  cfg,
 		repo: repo,
 	}
 }
@@ -49,7 +53,7 @@ func (o *OrderService) Create(userID int, order core.Order) error {
 
 		currentTime := time.Now().Format(time.RFC3339)
 
-		url("localhost:8080", order.ID)
+		url(o.cfg.AccrualSystemAddress, order.ID)
 		if err = o.repo.Create(userID, order, statusPROCESSED, currentTime); err != nil { // * клиент c таким номером не был найден, заказ сохраняется в бд
 			return err
 		}
