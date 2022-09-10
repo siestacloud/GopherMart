@@ -3,12 +3,16 @@ package service
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"sort"
 	"time"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/siestacloud/gopherMart/internal/core"
 	"github.com/siestacloud/gopherMart/internal/repository"
 	"github.com/siestacloud/gopherMart/pkg"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -45,6 +49,7 @@ func (o *OrderService) Create(userID int, order core.Order) error {
 
 		currentTime := time.Now().Format(time.RFC3339)
 
+		url("localhost:8080", order.ID)
 		if err = o.repo.Create(userID, order, statusPROCESSED, currentTime); err != nil { // * клиент c таким номером не был найден, заказ сохраняется в бд
 			return err
 		}
@@ -75,4 +80,30 @@ func (o *OrderService) GetListOrders(userID int) ([]core.Order, error) {
 	})
 	pkg.InfoPrint("service", "OK", list)
 	return list, err
+}
+
+type APIError struct {
+	Code      int       `json:"code"`
+	Message   string    `json:"message"`
+	Timestamp time.Time `json:"timestamp"`
+}
+
+func url(address, orderID string) {
+	var responseErr APIError
+
+	logger := logrus.New()
+	logger.Out = ioutil.Discard
+	client := resty.New().SetRetryCount(2).SetLogger(logger).
+		SetRetryWaitTime(1 * time.Second).
+		SetRetryMaxWaitTime(2 * time.Second)
+	rec, err := client.R().
+		SetError(&responseErr).SetDoNotParseResponse(false).
+		SetBody(nil).
+		Post("http://" + address + "/orders/" + orderID)
+	if err != nil {
+		// fmt.Println("resp err:  ", responseErr)
+		log.Println("AGENT resp err:: ", err)
+	}
+
+	pkg.InfoPrint("url", string(rec.Body()))
 }
