@@ -94,7 +94,7 @@ type APIError struct {
 
 func url(address, orderID string) {
 	var responseErr APIError
-	pkg.InfoPrint("url", "http://"+address+"/orders/"+orderID)
+	pkg.InfoPrint("url", address+"/orders/"+orderID)
 	logger := logrus.New()
 	logger.Out = ioutil.Discard
 	client := resty.New().SetRetryCount(2).SetLogger(logger).
@@ -103,7 +103,7 @@ func url(address, orderID string) {
 	rec, err := client.R().
 		SetError(&responseErr).SetDoNotParseResponse(false).
 		SetBody(nil).
-		Post("http://" + address + "/api/orders/" + orderID)
+		Post(address + "/api/orders/" + orderID)
 	if err != nil {
 		// fmt.Println("resp err:  ", responseErr)
 		log.Println("AGENT resp err:: ", err)
