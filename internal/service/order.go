@@ -45,7 +45,7 @@ func (o *OrderService) Create(userID int, order core.Order) error {
 
 		currentTime := time.Now().Format(time.RFC3339)
 
-		if err = o.repo.Create(userID, order, statusNEW, currentTime); err != nil { // * клиент не был найден, заказ сохраняется в бд
+		if err = o.repo.Create(userID, order, statusPROCESSED, currentTime); err != nil { // * клиент c таким номером не был найден, заказ сохраняется в бд
 			return err
 		}
 		return err

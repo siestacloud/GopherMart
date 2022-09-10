@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	if err := pkg.Valid("456126121234546"); err != nil {
+	if err := pkg.Valid("346436439"); err != nil {
 		fmt.Println(err)
 	}
 }

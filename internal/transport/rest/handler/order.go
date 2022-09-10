@@ -104,6 +104,7 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 			pkg.ErrPrint("transport", http.StatusNoContent, "no data to answer")
 			return errResponse(c, http.StatusNoContent, "")
 		}
+		c.Request().Header.Set("Content-Type", "application/json")
 
 		pkg.InfoPrint("transport", "OK", orderList)
 		return c.JSON(http.StatusOK, orderList)
