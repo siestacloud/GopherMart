@@ -54,7 +54,7 @@ func NewPostgresDB(urlDB string) (*sqlx.DB, error) {
 		log.Fatal(err)
 	}
 	// делаем запрос
-	if err := createTable(db, balanceTable, "CREATE TABLE balance (id serial not null unique,current int, withdrawn int);"); err != nil {
+	if err := createTable(db, balanceTable, "CREATE TABLE balance (id serial not null unique,current numeric, withdrawn numeric);"); err != nil {
 		log.Fatal(err)
 	}
 	// делаем запрос
