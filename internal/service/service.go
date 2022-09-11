@@ -27,6 +27,8 @@ type Accrual interface {
 
 type Balance interface {
 	Create(userId int) error
+	Get(userID int) (*core.Balance, error)
+	UpdateCurrent(userID int, order *core.Order) error
 }
 
 // Главный тип слоя SVC, который встраивается как зависимость в слое TRANSPORT

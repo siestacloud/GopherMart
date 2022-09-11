@@ -65,6 +65,11 @@ func (h *Handler) CreateOrder() echo.HandlerFunc {
 			return errResponse(c, http.StatusInternalServerError, "internal server error")
 		}
 
+		// * получаю информацию о расчете начислений баллов лояльности (внешнее api)
+		if err := h.services.Balance.UpdateCurrent(userID, &order); err != nil {
+			return errResponse(c, http.StatusBadRequest, err.Error())
+		}
+
 		pkg.InfoPrint("transport", "accepted", order.Number)
 		return c.NoContent(http.StatusAccepted)
 	}

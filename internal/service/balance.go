@@ -23,7 +23,13 @@ func (b *BalanceService) Create(userID int) error {
 	return b.repo.Create(userID)
 }
 
-// Update обновление текущего количества баллов клиента
+// Get получить текущее количество баллов клиента и общее количество использованных баллов за все время
+func (b *BalanceService) Get(userID int) (*core.Balance, error) {
+	return b.repo.Get(userID)
+}
+
+// UpdateCurrent обновление текущего количества баллов клиента
+// *получаю из базы имеющиеся баллы и добавляю к ним баллы из нового заказа
 func (b *BalanceService) UpdateCurrent(userID int, order *core.Order) error {
 	userBalance, err := b.repo.Get(userID)
 	if err != nil {
