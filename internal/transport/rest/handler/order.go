@@ -39,8 +39,6 @@ func (h *Handler) CreateOrder() echo.HandlerFunc {
 			return errResponse(c, http.StatusBadRequest, "bad request")
 		}
 		order.Number = string(body)
-		order.Status = "NEW"
-		fmt.Println("============", order)
 		// * валидация номера заказа
 		if err := c.Validate(order); err != nil {
 			pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
@@ -100,13 +98,17 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 			return errResponse(c, http.StatusInternalServerError, "internal server error")
 		}
 
+		respList := []core.Order{}
 		for i, _ := range orderList {
 			// * получаю информацию о расчете начислений баллов лояльности (внешнее api)
 			if err := h.services.Accrual.GetOrderAccrual(&orderList[i]); err != nil {
 				pkg.ErrPrint("transport", http.StatusInternalServerError, err)
 				// return errResponse(c, http.StatusBadRequest, err.Error())
 			}
-
+			if orderList[i].Status != "" {
+				// respList = append(respList, orderList[i])
+				orderList[i].Status = "PROCESSING"
+			}
 		}
 
 		// if len(orderList) == 0 {
@@ -115,8 +117,8 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 		// }
 		c.Request().Header.Set("Content-Type", "application/json")
 
-		pkg.InfoPrint("transport", "OK", orderList)
-		return c.JSON(http.StatusOK, orderList)
+		pkg.InfoPrint("transport", "OK", respList)
+		return c.JSON(http.StatusOK, respList)
 
 	}
 }
