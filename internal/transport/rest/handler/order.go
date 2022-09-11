@@ -104,7 +104,7 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 				pkg.ErrPrint("transport", http.StatusInternalServerError, err)
 				// return errResponse(c, http.StatusBadRequest, err.Error())
 			}
-			if orderList[i].Status != "" {
+			if orderList[i].Status == "" {
 				orderList[i].Status = "PROCESSING"
 				respList = append(respList, orderList[i])
 			}
