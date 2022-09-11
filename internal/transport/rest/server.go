@@ -122,4 +122,7 @@ func (s *Server) cfgRouter() {
 	balance := user.Group("/balance")
 	balance.Use(s.h.UserIdentity) // JWT token auth
 	balance.GET("", s.h.GetBalance())
+	balance.POST("/withdraw", s.h.WithdrawBalance())
+	balance.GET("/withdrawals", s.h.WithdrawalsBalance())
+
 }

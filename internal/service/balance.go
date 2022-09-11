@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/siestacloud/gopherMart/internal/core"
 	"github.com/siestacloud/gopherMart/internal/repository"
 )
@@ -37,4 +39,26 @@ func (b *BalanceService) UpdateCurrent(userID int, order *core.Order) error {
 	}
 	userBalance.Current += order.Accrual
 	return b.repo.UpdateCurrent(userBalance)
+}
+
+// Withdrawal списывую баллы с  баланса клиента и увеличивую общее количество использованных баллов за все время
+func (b *BalanceService) Withdrawal(userID int, orderNumber float64) error {
+	userBalance, err := b.repo.Get(userID)
+	if err != nil {
+		return err
+	}
+	userBalance.Current = -orderNumber
+	userBalance.Withdrawn = +orderNumber
+
+	if userBalance.Current < 0 {
+		return errors.New("there are not enough points on the balance")
+	}
+
+	if err := b.repo.UpdateCurrent(userBalance); err != nil {
+		return err
+	}
+	if err := b.repo.UpdateWithdrawn(userBalance); err != nil {
+		return err
+	}
+	return nil
 }
