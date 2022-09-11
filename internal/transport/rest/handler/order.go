@@ -98,10 +98,10 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 		}
 
 		respList := []core.Order{}
-		for i, _ := range orderList {
+		for i, v := range orderList {
 			// * получаю информацию о расчете начислений баллов лояльности (внешнее api)
 			if err := h.services.Accrual.GetOrderAccrual(&orderList[i]); err != nil {
-				pkg.ErrPrint("transport", http.StatusInternalServerError, err)
+				pkg.ErrPrint("transport", http.StatusInternalServerError, err, v)
 				// return errResponse(c, http.StatusBadRequest, err.Error())
 			}
 			if orderList[i].Status == "" {
