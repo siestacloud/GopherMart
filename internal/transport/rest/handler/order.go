@@ -100,7 +100,7 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 
 		orderList, err := h.services.GetListOrders(userID)
 		if err != nil {
-			pkg.ErrPrint("transportt", http.StatusInternalServerError, err)
+			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
 			return errResponse(c, http.StatusInternalServerError, "internal server error")
 		}
 

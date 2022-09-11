@@ -22,6 +22,8 @@ import (
 // @Router /api/user/balance [get]
 func (h *Handler) GetBalance() echo.HandlerFunc {
 	return func(c echo.Context) error {
+		pkg.InfoPrint("transport", "new request", "/api/user/balance")
+
 		userID, err := getUserId(c)
 		if err != nil {
 			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
