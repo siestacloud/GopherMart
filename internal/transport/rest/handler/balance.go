@@ -79,16 +79,13 @@ func (h *Handler) WithdrawBalance() echo.HandlerFunc {
 			return errResponse(c, http.StatusBadRequest, "bind body failure")
 		}
 		fmt.Println("ORDER  ", input.Order)
-		ID, err := h.services.GetUserByOrder(input.Order)
-		if err != nil {
+
+		if err := pkg.Valid(input.Order); err != nil {
 			pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
 			return errResponse(c, http.StatusUnprocessableEntity, "invalid order number")
 		}
-		if ID != userID {
-			pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
-			return errResponse(c, http.StatusUnprocessableEntity, "invalid order number")
-		}
-		if err := h.services.Withdrawal(ID, input.Sum); err != nil {
+
+		if err := h.services.Withdrawal(userID, input.Sum); err != nil {
 			if strings.Contains(err.Error(), "there are not enough points on the balance") {
 				pkg.ErrPrint("transport", http.StatusPaymentRequired, err)
 				return errResponse(c, http.StatusPaymentRequired, err.Error())

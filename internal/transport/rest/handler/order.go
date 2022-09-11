@@ -25,6 +25,7 @@ import (
 func (h *Handler) CreateOrder() echo.HandlerFunc {
 
 	return func(c echo.Context) error {
+		pkg.InfoPrint("transport", "new request", "/api/user/orders")
 		userID, err := getUserId(c)
 		if err != nil {
 			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
