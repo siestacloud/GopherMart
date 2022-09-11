@@ -89,32 +89,35 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userID, err := getUserId(c)
 		if err != nil {
-
 			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
 			return errResponse(c, http.StatusInternalServerError, err.Error()) // в контексте нет id пользователя
 		}
 
 		orderList, err := h.services.GetListOrders(userID)
 		if err != nil {
-
 			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
 			return errResponse(c, http.StatusInternalServerError, "internal server error")
 		}
 
+		respList := []core.Order{}
 		for i, _ := range orderList {
 			// * получаю информацию о расчете начислений баллов лояльности (внешнее api)
 			if err := h.services.Accrual.GetOrderAccrual(&orderList[i]); err != nil {
 				pkg.ErrPrint("transport", http.StatusInternalServerError, err)
 				// return errResponse(c, http.StatusBadRequest, err.Error())
 			}
+			if orderList[i].Status != "" {
+				respList = append(respList, orderList[i])
+			}
 		}
+
 		// if len(orderList) == 0 {
 		// 	pkg.ErrPrint("transport", http.StatusNoContent, "no data to answer")
 		// 	return errResponse(c, http.StatusNoContent, "")
 		// }
 		c.Request().Header.Set("Content-Type", "application/json")
 
-		pkg.InfoPrint("transport", "OK", orderList)
+		pkg.InfoPrint("transport", "OK", respList)
 		return c.JSON(http.StatusOK, orderList)
 
 	}
