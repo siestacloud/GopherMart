@@ -106,9 +106,8 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 			}
 			if orderList[i].Status == "" {
 				orderList[i].Status = "PROCESSING"
-				continue
+				respList = append(respList, orderList[i])
 			}
-			respList = append(respList, orderList[i])
 		}
 
 		// if len(orderList) == 0 {
