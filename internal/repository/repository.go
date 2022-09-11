@@ -26,6 +26,9 @@ type Accrual interface {
 
 type Balance interface {
 	Create(userId int) error
+	Get(userID int) (*core.Balance, error)
+	UpdateCurrent(balance *core.Balance) error
+	UpdateWithdrawn(balance *core.Balance) error
 }
 
 // Главный тип слоя repository, который встраивается как зависимость в слое SVC

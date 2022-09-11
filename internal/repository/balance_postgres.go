@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/siestacloud/gopherMart/internal/core"
+	"github.com/siestacloud/gopherMart/pkg"
 )
 
 // BalancePostgres
@@ -47,4 +49,55 @@ func (o *BalancePostgres) Create(userId int) error {
 		return err
 	}
 	return tx.Commit()
+}
+
+// Get получить текущее количество баллов клиента и общее количество использованных баллов за все время
+func (m *BalancePostgres) Get(userID int) (*core.Balance, error) {
+	if m.db == nil {
+		return nil, errors.New("database are not connected")
+	}
+
+	var balance core.Balance
+	query := fmt.Sprintf(`SELECT balance_id FROM %s  WHERE user_id = $1`, userBalanceTable)
+	if err := m.db.Get(&balance.ID, query, userID); err != nil {
+		pkg.ErrPrint("repository", 500, err)
+		return nil, err
+	}
+
+	query = fmt.Sprintf(`SELECT current,withdrawn FROM %s  WHERE id = $1`, balanceTable)
+	if err := m.db.Get(&balance, query, balance.ID); err != nil {
+		pkg.ErrPrint("repository", 500, err)
+		return nil, err
+	}
+	return &balance, nil
+}
+
+// UpdateCurrent обновить текущее количество баллов клиента
+func (m *BalancePostgres) UpdateCurrent(balance *core.Balance) error {
+	if m.db == nil {
+		return errors.New("database are not connected")
+	}
+	balanceQuery := fmt.Sprintf("UPDATE %s SET current = %v WHERE id = %v ", balanceTable, balance.Current, balance.ID)
+	_, err := m.db.Exec(balanceQuery)
+	if err != nil {
+		pkg.ErrPrint("repository", 500, err)
+		return err
+	}
+
+	return nil
+}
+
+// UpdateWithdrawn обновить общее количество использованных баллов клиента за все время
+func (m *BalancePostgres) UpdateWithdrawn(balance *core.Balance) error {
+	if m.db == nil {
+		return errors.New("database are not connected")
+	}
+	balanceQuery := fmt.Sprintf("UPDATE %s SET withdrawn = %v WHERE id = %v ", balanceTable, balance.Withdrawn, balance.ID)
+	_, err := m.db.Exec(balanceQuery)
+	if err != nil {
+		pkg.ErrPrint("repository", 500, err)
+		return err
+	}
+
+	return nil
 }
