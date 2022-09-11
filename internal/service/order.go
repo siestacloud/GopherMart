@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"sort"
 	"time"
 
@@ -43,7 +42,6 @@ func (o *OrderService) Create(userID int, order core.Order) error {
 		}
 		return err
 	}
-	fmt.Println(userDB, "==", userID)
 	if userDB == userID {
 		return errors.New("user already have order")
 	}
