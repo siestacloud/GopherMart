@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -77,7 +78,7 @@ func (h *Handler) WithdrawBalance() echo.HandlerFunc {
 			pkg.ErrPrint("transport", http.StatusBadRequest, err)
 			return errResponse(c, http.StatusBadRequest, "bind body failure")
 		}
-
+		fmt.Println("ORDER  ", input.Order)
 		ID, err := h.services.GetUserByOrder(input.Order)
 		if err != nil {
 			pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
