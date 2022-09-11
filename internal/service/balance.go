@@ -47,8 +47,8 @@ func (b *BalanceService) Withdrawal(userID int, orderNumber float64) error {
 	if err != nil {
 		return err
 	}
-	userBalance.Current = -orderNumber
-	userBalance.Withdrawn = +orderNumber
+	userBalance.Current -= orderNumber
+	userBalance.Withdrawn += orderNumber
 
 	if userBalance.Current < 0 {
 		return errors.New("there are not enough points on the balance")
