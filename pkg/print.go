@@ -4,9 +4,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func InfoPrint(layer, status, message string) {
-	logrus.WithFields(logrus.Fields{"layer": layer, "status": status}).Info(message)
+func InfoPrint(layer, status string, message ...interface{}) {
+	logrus.WithFields(logrus.Fields{"layer": layer, "status": status}).Info(message...)
 }
-func ErrPrint(layer, status, message string, err error) {
-	logrus.WithFields(logrus.Fields{"layer": layer, "status": status, "error": err}).Error(message)
+
+func WarnPrint(layer, status string, message ...interface{}) {
+	logrus.WithFields(logrus.Fields{"layer": layer, "status": status}).Warn(message...)
+}
+
+func ErrPrint(layer, status interface{}, message ...interface{}) {
+	logrus.WithFields(logrus.Fields{"layer": layer, "status": status}).Error(message...)
 }

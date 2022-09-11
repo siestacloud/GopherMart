@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	_ "github.com/lib/pq"
@@ -35,16 +34,15 @@ func main() {
 		log.Fatal(err)
 	}
 	// подключение базы
-	fmt.Println(cfg.URLPostgres)
 	db, err := repository.NewPostgresDB(cfg.URLPostgres)
 	if err != nil {
 		logrus.Warnf("failed to initialize postrges: %s", err.Error())
 	}
 
 	// подключаем слои
-	repos := repository.NewRepository(db)
+	repos := repository.NewRepository(&cfg, db)
 	services := service.NewService(repos)
-	handlers := handler.NewHandler(&cfg, services)
+	handlers := handler.NewHandler(services)
 
 	s, err := rest.NewServer(&cfg, handlers)
 	if err != nil {
