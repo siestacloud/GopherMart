@@ -2,12 +2,25 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/siestacloud/gopherMart/pkg"
 )
 
+type objs struct {
+	id   int
+	name string
+}
+
 func main() {
-	if err := pkg.Valid("346436439"); err != nil {
-		fmt.Println(err)
+	arr := []objs{objs{id: 1, name: "name1"}, objs{id: 2, name: "name2"}}
+	fmt.Println(arr)
+
+	for i, _ := range arr {
+		change(&arr[i])
+
 	}
+	fmt.Println(arr)
+
+}
+
+func change(item *objs) {
+	item.name = "qwe"
 }

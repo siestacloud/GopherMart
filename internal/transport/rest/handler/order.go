@@ -101,17 +101,17 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 			return errResponse(c, http.StatusInternalServerError, "internal server error")
 		}
 
-		for _, order := range orderList {
+		for i, _ := range orderList {
 			// * получаю информацию о расчете начислений баллов лояльности (внешнее api)
-			if err := h.services.Accrual.GetOrderAccrual(&order); err != nil {
+			if err := h.services.Accrual.GetOrderAccrual(&orderList[i]); err != nil {
 				pkg.ErrPrint("transport", http.StatusInternalServerError, err)
 				// return errResponse(c, http.StatusBadRequest, err.Error())
 			}
 		}
-		if len(orderList) == 0 {
-			pkg.ErrPrint("transport", http.StatusNoContent, "no data to answer")
-			return errResponse(c, http.StatusNoContent, "")
-		}
+		// if len(orderList) == 0 {
+		// 	pkg.ErrPrint("transport", http.StatusNoContent, "no data to answer")
+		// 	return errResponse(c, http.StatusNoContent, "")
+		// }
 		c.Request().Header.Set("Content-Type", "application/json")
 
 		pkg.InfoPrint("transport", "OK", orderList)
