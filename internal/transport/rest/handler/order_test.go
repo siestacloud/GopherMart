@@ -18,7 +18,7 @@ import (
 )
 
 func TestHandler_CreateOrder(t *testing.T) {
-	type mockBehavior func(r *service_mocks.MockOrder, UserID int, order core.Order)
+	type mockBehavior func(r *service_mocks.MockOrder, a *service_mocks.MockAccrual, UserID int, order core.Order)
 	// тестовая таблица
 	tests := []struct {
 		name                 string       // * имя теста
@@ -34,13 +34,13 @@ func TestHandler_CreateOrder(t *testing.T) {
 		{
 
 			// * новый номер заказа принят в обработку
-			name:      "Order accepted",
-			userID:    1,
-			inputBody: `4561261212345467`,
-			inputOrder: core.Order{
-				ID: "4561261212345467",
-			},
-			mockBehavior: func(r *service_mocks.MockOrder, UserID int, order core.Order) {
+			name:       "Order accepted",
+			userID:     1,
+			inputBody:  `4561261212345467`,
+			inputOrder: core.Order{Number: "4561261212345467"},
+			mockBehavior: func(r *service_mocks.MockOrder, a *service_mocks.MockAccrual, UserID int, order core.Order) {
+
+				a.EXPECT().GetOrderAccrual(&order).Return(nil)
 				r.EXPECT().Create(UserID, order).Return(nil)
 			},
 			expectedStatusCode:   202,
@@ -51,8 +51,9 @@ func TestHandler_CreateOrder(t *testing.T) {
 			name:       "Ok",
 			userID:     1,
 			inputBody:  `10000000`,
-			inputOrder: core.Order{ID: "10000000"},
-			mockBehavior: func(r *service_mocks.MockOrder, UserID int, order core.Order) {
+			inputOrder: core.Order{Number: "10000000"},
+			mockBehavior: func(r *service_mocks.MockOrder, a *service_mocks.MockAccrual, UserID int, order core.Order) {
+				a.EXPECT().GetOrderAccrual(&order).Return(nil)
 				r.EXPECT().Create(UserID, order).Return(errors.New("user already have order"))
 			},
 			expectedStatusCode:   200,
@@ -60,12 +61,24 @@ func TestHandler_CreateOrder(t *testing.T) {
 		},
 		// ! проверка негативных сценариев
 		{
+			// * Система расчета баллов лояльности недоступна
+			name:       "unreachible accrual system API ",
+			userID:     1,
+			inputBody:  `4561261212345467`,
+			inputOrder: core.Order{Number: "4561261212345467"},
+			mockBehavior: func(r *service_mocks.MockOrder, a *service_mocks.MockAccrual, UserID int, order core.Order) {
+				a.EXPECT().GetOrderAccrual(&order).Return(errors.New("unable GET accrual system API"))
+			},
+			expectedStatusCode:   400,
+			expectedResponseBody: `{"message":"unable GET accrual system API"}` + "\n",
+		},
+		{
 			// * неверный формат номера заказа
 			name:                 "empty client body",
 			userID:               1,
 			inputBody:            ``,
-			inputOrder:           core.Order{ID: ""},
-			mockBehavior:         func(r *service_mocks.MockOrder, UserID int, order core.Order) {},
+			inputOrder:           core.Order{Number: ""},
+			mockBehavior:         func(r *service_mocks.MockOrder, a *service_mocks.MockAccrual, UserID int, order core.Order) {},
 			expectedStatusCode:   422,
 			expectedResponseBody: `{"message":"order format failure"}` + "\n",
 		},
@@ -74,8 +87,8 @@ func TestHandler_CreateOrder(t *testing.T) {
 			name:                 "some text in client body",
 			userID:               1,
 			inputBody:            `hello I,m hacking your order system!!!`,
-			inputOrder:           core.Order{ID: ""},
-			mockBehavior:         func(r *service_mocks.MockOrder, UserID int, order core.Order) {},
+			inputOrder:           core.Order{Number: ""},
+			mockBehavior:         func(r *service_mocks.MockOrder, a *service_mocks.MockAccrual, UserID int, order core.Order) {},
 			expectedStatusCode:   422,
 			expectedResponseBody: `{"message":"order format failure"}` + "\n",
 		},
@@ -84,8 +97,8 @@ func TestHandler_CreateOrder(t *testing.T) {
 			name:                 `json in client body`,
 			userID:               717,
 			inputBody:            `{"hackJSON": "//0213ddsd2/dsd","0_0": "HackScripts[<djsldnas><>]"}`,
-			inputOrder:           core.Order{ID: ""},
-			mockBehavior:         func(r *service_mocks.MockOrder, UserID int, order core.Order) {},
+			inputOrder:           core.Order{Number: ""},
+			mockBehavior:         func(r *service_mocks.MockOrder, a *service_mocks.MockAccrual, UserID int, order core.Order) {},
 			expectedStatusCode:   422,
 			expectedResponseBody: `{"message":"order format failure"}` + "\n",
 		},
@@ -94,8 +107,8 @@ func TestHandler_CreateOrder(t *testing.T) {
 			name:                 "0s client body",
 			userID:               717,
 			inputBody:            `000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000`,
-			inputOrder:           core.Order{ID: ""},
-			mockBehavior:         func(r *service_mocks.MockOrder, UserID int, order core.Order) {},
+			inputOrder:           core.Order{Number: ""},
+			mockBehavior:         func(r *service_mocks.MockOrder, a *service_mocks.MockAccrual, UserID int, order core.Order) {},
 			expectedStatusCode:   422,
 			expectedResponseBody: `{"message":"order format failure"}` + "\n",
 		},
@@ -104,8 +117,9 @@ func TestHandler_CreateOrder(t *testing.T) {
 			name:       "Order another user",
 			userID:     1,
 			inputBody:  `4561261212345467`,
-			inputOrder: core.Order{ID: "4561261212345467"},
-			mockBehavior: func(r *service_mocks.MockOrder, UserID int, order core.Order) {
+			inputOrder: core.Order{Number: "4561261212345467"},
+			mockBehavior: func(r *service_mocks.MockOrder, a *service_mocks.MockAccrual, UserID int, order core.Order) {
+				a.EXPECT().GetOrderAccrual(&order).Return(nil)
 				r.EXPECT().Create(UserID, order).Return(errors.New("another user order"))
 			},
 			expectedStatusCode:   409,
@@ -116,8 +130,9 @@ func TestHandler_CreateOrder(t *testing.T) {
 			name:       "Internal server error",
 			userID:     1,
 			inputBody:  `4561261212345467`,
-			inputOrder: core.Order{ID: "4561261212345467"},
-			mockBehavior: func(r *service_mocks.MockOrder, UserID int, order core.Order) {
+			inputOrder: core.Order{Number: "4561261212345467"},
+			mockBehavior: func(r *service_mocks.MockOrder, a *service_mocks.MockAccrual, UserID int, order core.Order) {
+				a.EXPECT().GetOrderAccrual(&order).Return(nil)
 				r.EXPECT().Create(UserID, order).Return(errors.New("some err in service or repository layers..."))
 			},
 			expectedStatusCode:   500,
@@ -141,14 +156,14 @@ func TestHandler_CreateOrder(t *testing.T) {
 			defer c.Finish()
 
 			// * создаем мок слоя сервис, передаем контроллер как аргумент
+			accrual := service_mocks.NewMockAccrual(c)
 			order := service_mocks.NewMockOrder(c)
-
 			// * в данном тестовом сценарии ожидаем получить
 			// * вызов метода сервиса и получить в качестве аргумента данную структуру
-			test.mockBehavior(order, test.userID, test.inputOrder)
+			test.mockBehavior(order, accrual, test.userID, test.inputOrder)
 
 			// * инициализируем слой service, имплементируем интерфейс Authorization моком auth
-			services := &service.Service{Order: order}
+			services := &service.Service{Order: order, Accrual: accrual}
 			handler := NewHandler(services)
 
 			// * инициализация тестового ендпоитна

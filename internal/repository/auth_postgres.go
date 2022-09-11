@@ -50,10 +50,8 @@ func (r *AuthPostgres) GetUser(login, password string) (*core.User, error) {
 	var user core.User
 	query := fmt.Sprintf("SELECT id FROM %s WHERE login=$1 AND password_hash=$2", usersTable)
 	if err := r.db.Get(&user, query, login, password); err != nil {
-
 		pkg.ErrPrint("repository", 409, err)
 		return nil, errors.New("invalid username/password pair")
-
 	}
 
 	return &user, nil

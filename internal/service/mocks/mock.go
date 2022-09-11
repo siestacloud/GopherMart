@@ -114,17 +114,17 @@ func (m *MockOrder) EXPECT() *MockOrderMockRecorder {
 }
 
 // Create mocks base method
-func (m *MockOrder) Create(userId int, order core.Order) error {
+func (m *MockOrder) Create(userID int, order core.Order) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", userId, order)
+	ret := m.ctrl.Call(m, "Create", userID, order)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Create indicates an expected call of Create
-func (mr *MockOrderMockRecorder) Create(userId, order interface{}) *gomock.Call {
+func (mr *MockOrderMockRecorder) Create(userID, order interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockOrder)(nil).Create), userId, order)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockOrder)(nil).Create), userID, order)
 }
 
 // GetUserByOrder mocks base method
@@ -155,4 +155,41 @@ func (m *MockOrder) GetListOrders(userID int) ([]core.Order, error) {
 func (mr *MockOrderMockRecorder) GetListOrders(userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetListOrders", reflect.TypeOf((*MockOrder)(nil).GetListOrders), userID)
+}
+
+// MockAccrual is a mock of Accrual interface
+type MockAccrual struct {
+	ctrl     *gomock.Controller
+	recorder *MockAccrualMockRecorder
+}
+
+// MockAccrualMockRecorder is the mock recorder for MockAccrual
+type MockAccrualMockRecorder struct {
+	mock *MockAccrual
+}
+
+// NewMockAccrual creates a new mock instance
+func NewMockAccrual(ctrl *gomock.Controller) *MockAccrual {
+	mock := &MockAccrual{ctrl: ctrl}
+	mock.recorder = &MockAccrualMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockAccrual) EXPECT() *MockAccrualMockRecorder {
+	return m.recorder
+}
+
+// GetOrderAccrual mocks base method
+func (m *MockAccrual) GetOrderAccrual(order *core.Order) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrderAccrual", order)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// GetOrderAccrual indicates an expected call of GetOrderAccrual
+func (mr *MockAccrualMockRecorder) GetOrderAccrual(order interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderAccrual", reflect.TypeOf((*MockAccrual)(nil).GetOrderAccrual), order)
 }

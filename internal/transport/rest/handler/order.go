@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -27,29 +28,28 @@ func (h *Handler) CreateOrder() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userID, err := getUserId(c)
 		if err != nil {
-
 			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
 			return errResponse(c, http.StatusInternalServerError, err.Error()) // в контексте нет id пользователя
 		}
-
+		// * парсинг
 		var order core.Order
 		body, err := ioutil.ReadAll(c.Request().Body)
 		if err != nil {
 			pkg.ErrPrint("transport", http.StatusBadRequest, err)
 			return errResponse(c, http.StatusBadRequest, "bad request")
 		}
-
-		order.ID = string(body)
-		// if err != nil {
-		// 	pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
-		// 	return errResponse(c, http.StatusUnprocessableEntity, "order format failure")
-		// }
-
+		order.Number = string(body)
+		fmt.Println("============", order)
+		// * валидация номера заказа
 		if err := c.Validate(order); err != nil {
 			pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
 			return errResponse(c, http.StatusUnprocessableEntity, "order format failure")
 		}
-
+		// * получаю информацию о расчете начислений баллов лояльности (внешнее api)
+		if err := h.services.Accrual.GetOrderAccrual(&order); err != nil {
+			return errResponse(c, http.StatusBadRequest, err.Error())
+		}
+		// * проверяю заказ по алг луна и добавляю в бд (связывая с клиентом)
 		if err := h.services.Order.Create(userID, order); err != nil {
 			if strings.Contains(err.Error(), "lune") {
 				pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
@@ -67,7 +67,7 @@ func (h *Handler) CreateOrder() echo.HandlerFunc {
 			return errResponse(c, http.StatusInternalServerError, "internal server error")
 		}
 
-		pkg.InfoPrint("transport", "accepted", order.ID)
+		pkg.InfoPrint("transport", "accepted", order.Number)
 		return c.NoContent(http.StatusAccepted)
 	}
 }
@@ -93,6 +93,7 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
 			return errResponse(c, http.StatusInternalServerError, err.Error()) // в контексте нет id пользователя
 		}
+
 		orderList, err := h.services.GetListOrders(userID)
 		if err != nil {
 

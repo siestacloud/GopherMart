@@ -14,7 +14,7 @@ func Parse(cfg *Cfg) error {
 
 	flag.StringVar(&cfg.Address, "a", "localhost:8080", "Address for server. Possible values: localhost:8080")
 	flag.StringVar(&cfg.URLPostgres, "d", "not set", "url for postgres db con. Possible values: url")
-	flag.StringVar(&cfg.AccrualSystemAddress, "r", "localhost:8081", "black api. Possible values: localhost:8081")
+	flag.StringVar(&cfg.AccrualSystemAddress, "r", "http://localhost:8081", "black api. Possible values: http://localhost:8081")
 	flag.StringVar(&cfg.Logrus.LogLevel, "l", "info", "log level. Possible values: debug, info")
 	flag.BoolVar(&cfg.Logrus.JSON, "f", false, "JSON log format. Possible values: true, false")
 

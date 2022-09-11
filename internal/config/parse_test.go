@@ -21,7 +21,7 @@ func TestParse(t *testing.T) {
 				Server: config.Server{
 					Address:              "localhost:8080",
 					URLPostgres:          "not set",
-					AccrualSystemAddress: "not set",
+					AccrualSystemAddress: "http://localhost:8081",
 					Logrus: config.Logrus{
 						LogLevel: "info",
 						JSON:     false},

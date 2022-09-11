@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/siestacloud/gopherMart/internal/config"
 	"github.com/siestacloud/gopherMart/internal/core"
 	"github.com/siestacloud/gopherMart/internal/repository"
 	repository_mocks "github.com/siestacloud/gopherMart/internal/repository/mocks"
@@ -70,7 +69,7 @@ func TestService_CreateUser(t *testing.T) {
 			// * инициализируем слой service, имплементируем интерфейс Authorization моком auth
 			repository := &repository.Repository{Authorization: auth}
 
-			service := NewService(&config.Cfg{}, repository)
+			service := NewService(repository)
 
 			res, err := service.CreateUser(test.inputUser)
 			if err != nil {
@@ -146,7 +145,7 @@ func TestService_GenerateToken(t *testing.T) {
 			// * инициализируем слой service, имплементируем интерфейс Authorization моком auth
 			repository := &repository.Repository{Authorization: auth}
 
-			service := NewService(&config.Cfg{}, repository)
+			service := NewService(repository)
 
 			res, err := service.GenerateToken(test.login, test.password)
 			if err != nil {

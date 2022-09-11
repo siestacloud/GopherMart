@@ -40,8 +40,8 @@ func main() {
 	}
 
 	// подключаем слои
-	repos := repository.NewRepository(db)
-	services := service.NewService(&cfg, repos)
+	repos := repository.NewRepository(&cfg, db)
+	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
 
 	s, err := rest.NewServer(&cfg, handlers)
