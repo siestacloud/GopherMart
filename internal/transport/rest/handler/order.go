@@ -97,7 +97,7 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 			return errResponse(c, http.StatusInternalServerError, "internal server error")
 		}
 
-		respList := []core.Order{}
+		// respList := []core.Order{}
 		for i, _ := range orderList {
 			// * получаю информацию о расчете начислений баллов лояльности (внешнее api)
 			if err := h.services.Accrual.GetOrderAccrual(&orderList[i]); err != nil {
@@ -106,7 +106,7 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 			}
 			if orderList[i].Status == "" {
 				orderList[i].Status = "PROCESSING"
-				respList = append(respList, orderList[i])
+				// respList = append(respList, orderList[i])
 			}
 		}
 
@@ -116,8 +116,8 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 		// }
 		c.Request().Header.Set("Content-Type", "application/json")
 
-		pkg.InfoPrint("transport", "OK", respList)
-		return c.JSON(http.StatusOK, respList)
+		pkg.InfoPrint("transport", "OK", orderList)
+		return c.JSON(http.StatusOK, orderList)
 
 	}
 }
