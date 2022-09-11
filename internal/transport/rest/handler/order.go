@@ -109,13 +109,13 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 			}
 		}
 
-		// if len(orderList) == 0 {
-		// 	pkg.ErrPrint("transport", http.StatusNoContent, "no data to answer")
-		// 	return errResponse(c, http.StatusNoContent, "")
-		// }
 		c.Request().Header.Set("Content-Type", "application/json")
 
 		respList = append(respList, orderList[len(orderList)-1])
+		if len(respList) == 0 {
+			pkg.ErrPrint("transport", http.StatusNoContent, "no data to answer")
+			return errResponse(c, http.StatusNoContent, "")
+		}
 		pkg.InfoPrint("transport", "OK", respList)
 		return c.JSON(http.StatusOK, respList)
 
