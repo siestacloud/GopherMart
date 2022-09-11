@@ -11,9 +11,11 @@ import (
 )
 
 const (
-	usersTable     = "users"
-	ordersTable    = "orders"
-	userOrderTable = "users_orders"
+	usersTable       = "users"
+	ordersTable      = "orders"
+	balanceTable     = "balance"
+	userOrderTable   = "users_orders"
+	userBalanceTable = "users_balance"
 )
 
 type Config struct {
@@ -51,6 +53,15 @@ func NewPostgresDB(urlDB string) (*sqlx.DB, error) {
 	if err := createTable(db, userOrderTable, "CREATE TABLE users_orders (id serial not null unique,user_id int references users (id) on delete cascade not null,order_id int references orders (id) on delete cascade not null);"); err != nil {
 		log.Fatal(err)
 	}
+	// делаем запрос
+	if err := createTable(db, balanceTable, "CREATE TABLE balance (id serial not null unique,current int, withdrawn int);"); err != nil {
+		log.Fatal(err)
+	}
+	// делаем запрос
+	if err := createTable(db, userBalanceTable, "CREATE TABLE users_balance (id serial not null unique,user_id int references users (id) on delete cascade not null,balance_id int references balance (id) on delete cascade not null);"); err != nil {
+		log.Fatal(err)
+	}
+
 	return db, nil
 }
 
@@ -72,10 +83,10 @@ func createTable(db *sqlx.DB, nameTable, query string) error {
 		if err != nil {
 			return err
 		}
-		pkg.InfoPrint("repository", "ok", "Table users successful create")
+		pkg.InfoPrint("repository", "ok", "Table  successful create")
 
 	} else {
-		pkg.WarnPrint("repository", "ok", "Table users already created")
+		pkg.WarnPrint("repository", "ok", "Table  already created")
 	}
 
 	return nil

@@ -25,10 +25,15 @@ type Accrual interface {
 	GetOrderAccrual(order *core.Order) error
 }
 
+type Balance interface {
+	Create(userId int) error
+}
+
 // Главный тип слоя SVC, который встраивается как зависимость в слое TRANSPORT
 type Service struct {
 	Authorization
 	Accrual
+	Balance
 	Order
 }
 
@@ -37,6 +42,7 @@ func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
 		Accrual:       NewAccrualService(repos.Accrual),
+		Balance:       NewBalanceService(repos.Balance),
 		Order:         NewOrderService(repos.Order),
 	}
 }

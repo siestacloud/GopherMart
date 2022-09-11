@@ -21,7 +21,7 @@ func NewOrderPostgres(db *sqlx.DB) *OrderPostgres {
 	}
 }
 
-// Пример обращения к БД в качестве транзакции
+// Create транзакция. Добавляю заказ в базу и связывую с клиентом
 func (o *OrderPostgres) Create(userId int, order core.Order) error {
 	if o.db == nil {
 		return errors.New("database are not connected")

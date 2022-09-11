@@ -24,10 +24,15 @@ type Accrual interface {
 	GetOrderAccrual(order *core.Order) error
 }
 
+type Balance interface {
+	Create(userId int) error
+}
+
 // Главный тип слоя repository, который встраивается как зависимость в слое SVC
 type Repository struct {
 	Authorization
 	Accrual
+	Balance
 	Order
 }
 
@@ -36,6 +41,7 @@ func NewRepository(cfg *config.Cfg, db *sqlx.DB) *Repository {
 	return &Repository{
 		Authorization: NewAuthPostgres(db),
 		Accrual:       NewAccrualAPI(cfg),
+		Balance:       NewBalancePostgres(db),
 		Order:         NewOrderPostgres(db),
 	}
 }

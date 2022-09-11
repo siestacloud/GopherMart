@@ -36,7 +36,7 @@ func (h *Handler) SignUp() echo.HandlerFunc {
 			return errResponse(c, http.StatusBadRequest, "validate failure")
 		}
 
-		_, err := h.services.Authorization.CreateUser(input)
+		userID, err := h.services.Authorization.CreateUser(input)
 		if err != nil {
 			if strings.Contains(err.Error(), "login busy") {
 				pkg.ErrPrint("transport", http.StatusConflict, err)
@@ -54,6 +54,12 @@ func (h *Handler) SignUp() echo.HandlerFunc {
 			return errResponse(c, http.StatusInternalServerError, "internal server error")
 
 		}
+		// * создаю баланс для нового пользователя
+		if err := h.services.Balance.Create(userID); err != nil {
+			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
+			return errResponse(c, http.StatusInternalServerError, "internal server error")
+		}
+
 		c.Response().Header().Set("Authorization", "Bearer "+token)
 		return c.NoContent(http.StatusOK)
 	}
