@@ -95,7 +95,7 @@ func (h *Handler) WithdrawBalance() echo.HandlerFunc {
 		}
 
 		pkg.InfoPrint("transport", "accepted", userID)
-		return c.NoContent(http.StatusAccepted)
+		return c.NoContent(http.StatusOK)
 	}
 }
 
