@@ -90,6 +90,8 @@ func (h *Handler) CreateOrder() echo.HandlerFunc {
 // @Router /api/user/orders [get]
 func (h *Handler) GetOrders() echo.HandlerFunc {
 	return func(c echo.Context) error {
+		pkg.InfoPrint("transport", "new request", "/api/user/orders")
+
 		userID, err := getUserId(c)
 		if err != nil {
 			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
@@ -98,7 +100,7 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 
 		orderList, err := h.services.GetListOrders(userID)
 		if err != nil {
-			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
+			pkg.ErrPrint("transportt", http.StatusInternalServerError, err)
 			return errResponse(c, http.StatusInternalServerError, "internal server error")
 		}
 
@@ -106,7 +108,7 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 		for i, v := range orderList {
 			// * получаю информацию о расчете начислений баллов лояльности (внешнее api)
 			if err := h.services.Accrual.GetOrderAccrual(&orderList[i]); err != nil {
-				pkg.ErrPrint("transportt", http.StatusInternalServerError, err, v)
+				pkg.ErrPrint("transport", http.StatusInternalServerError, err, v)
 				// return errResponse(c, http.StatusBadRequest, err.Error())
 			}
 			if orderList[i].Status == "" {
