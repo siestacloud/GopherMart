@@ -105,8 +105,8 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 				// return errResponse(c, http.StatusBadRequest, err.Error())
 			}
 			if orderList[i].Status != "" {
-				// respList = append(respList, orderList[i])
 				orderList[i].Status = "PROCESSING"
+				respList = append(respList, orderList[i])
 			}
 		}
 
