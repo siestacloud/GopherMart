@@ -22,7 +22,7 @@ func NewOrderPostgres(db *sqlx.DB) *OrderPostgres {
 }
 
 // Пример обращения к БД в качестве транзакции
-func (o *OrderPostgres) Create(userId int, order core.Order, createTime string) error {
+func (o *OrderPostgres) Create(userId int, order core.Order) error {
 	if o.db == nil {
 		return errors.New("database are not connected")
 	}
@@ -32,7 +32,7 @@ func (o *OrderPostgres) Create(userId int, order core.Order, createTime string) 
 	}
 	var id int
 	createListQuery := fmt.Sprintf("INSERT INTO %s (user_order,status,create_time) VALUES ($1,$2,$3) RETURNING id", ordersTable)
-	row := tx.QueryRow(createListQuery, order.Number, order.Status, createTime)
+	row := tx.QueryRow(createListQuery, order.Number, order.Status, order.CreateTime)
 	if err := row.Scan(&id); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err

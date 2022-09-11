@@ -10,6 +10,11 @@ import (
 	"github.com/siestacloud/gopherMart/pkg"
 )
 
+var (
+	statusNew string = "NEW"
+	//// statusProcessing string = "PROCESSING"
+)
+
 // OrderService реализация бизнес логики обработки номера заказа
 type OrderService struct {
 	repo repository.Order
@@ -34,10 +39,11 @@ func (o *OrderService) Create(userID int, order core.Order) error {
 	userDB, err := o.repo.GetUserByOrder(order.Number) // * попытка определить клиента по номеру заказа
 	if err != nil {
 		pkg.WarnPrint("service", "get user by order", err)
-
-		currentTime := time.Now().Format(time.RFC3339)
-
-		if err = o.repo.Create(userID, order, currentTime); err != nil { // * клиент c таким номером не был найден, заказ сохраняется в бд
+		order.CreateTime = time.Now().Format(time.RFC3339)
+		if order.Status == "" {
+			order.Status = statusNew
+		}
+		if err = o.repo.Create(userID, order); err != nil { // * клиент c таким номером не был найден, заказ сохраняется в бд
 			return err
 		}
 		return err
