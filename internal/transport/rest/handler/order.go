@@ -45,10 +45,10 @@ func (h *Handler) CreateOrder() echo.HandlerFunc {
 			pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
 			return errResponse(c, http.StatusUnprocessableEntity, "order format failure")
 		}
-		// * получаю информацию о расчете начислений баллов лояльности (внешнее api)
-		if err := h.services.Accrual.GetOrderAccrual(&order); err != nil {
-			return errResponse(c, http.StatusBadRequest, err.Error())
-		}
+		// // * получаю информацию о расчете начислений баллов лояльности (внешнее api)
+		// if err := h.services.Accrual.GetOrderAccrual(&order); err != nil {
+		// 	return errResponse(c, http.StatusBadRequest, err.Error())
+		// }
 		// * проверяю заказ по алг луна и добавляю в бд (связывая с клиентом)
 		if err := h.services.Order.Create(userID, order); err != nil {
 			if strings.Contains(err.Error(), "lune") {
