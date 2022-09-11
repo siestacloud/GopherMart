@@ -118,7 +118,7 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 		c.Request().Header.Set("Content-Type", "application/json")
 
 		pkg.InfoPrint("transport", "OK", respList)
-		return c.JSON(http.StatusOK, orderList)
+		return c.JSON(http.StatusOK, respList)
 
 	}
 }
