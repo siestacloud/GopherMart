@@ -103,27 +103,28 @@ func (s *Server) cfgRouter() {
 	api := s.e.Group("/api")
 	api.GET("/test/", s.h.Test())
 
-	// 	* `POST /api/user/register` — регистрация пользователя;
-	// 	* `POST /api/user/login` 	— аутентификация пользователя;
+	// 	* `POST /api/user/register` 					— регистрация пользователя;
+	// 	* `POST /api/user/login` 						— аутентификация пользователя;
 	user := api.Group("/user")
 	user.POST("/register", s.h.SignUp())
 	user.POST("/login", s.h.SignIn())
 
-	// * POST /api/user/orders — загрузка пользователем номера заказа для расчёта;
-	// * GET /api/user/orders  — получение списка загруженных пользователем номеров заказов, статусов их обработки и информации о начислениях;
+	// * POST /api/user/orders							— загрузка пользователем номера заказа для расчёта;
+	// * GET /api/user/orders  							— получение списка загруженных пользователем номеров заказов, статусов их обработки и информации о начислениях;
 	orders := user.Group("/orders")
-	orders.Use(s.h.UserIdentity) // JWT token auth
+	orders.Use(s.h.UserIdentity) //! доступ ограничен JWT token
 	orders.POST("", s.h.CreateOrder())
 	orders.GET("", s.h.GetOrders())
 
-	// *  GET /api/user/balance 			 — Получение текущего баланса пользователя
-	// *  POST /api/user/balance/withdraw    — Запрос на списание средств
+	// *  GET /api/user/balance 			 			— Получение текущего баланса пользователя;
+	// *  POST /api/user/balance/withdraw			    — Запрос на списание средств;
 	balance := user.Group("/balance")
-	balance.Use(s.h.UserIdentity) // JWT token auth
+	balance.Use(s.h.UserIdentity) //! доступ ограничен JWT token
 	balance.GET("", s.h.GetBalance())
 	balance.POST("/withdraw", s.h.WithdrawBalance())
 
-	// *  GET /api/user/withdrawals  — Получение информации о выводе средств
+	// *  GET /api/user/withdrawals  					— Получение информации о выводе средств;
 	withdrawals := user.Group("/withdrawals")
+	balance.Use(s.h.UserIdentity) //! доступ ограничен JWT token
 	withdrawals.GET("", s.h.WithdrawalsBalance())
 }
