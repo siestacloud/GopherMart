@@ -124,7 +124,7 @@ func TestHandler_userIdentity(t *testing.T) {
 	}
 }
 
-func TestGetUserId(t *testing.T) {
+func TestGetUserID(t *testing.T) {
 	var getContext = func(id interface{}) *echo.Context {
 		e := echo.New()
 		rec := httptest.NewRecorder()
@@ -155,7 +155,7 @@ func TestGetUserId(t *testing.T) {
 
 	for _, test := range testTable {
 		t.Run(test.name, func(t *testing.T) {
-			id, err := getUserId(*test.ctx)
+			id, err := getUserID(*test.ctx)
 			if test.shouldFail {
 				assert.Error(t, err)
 			} else {

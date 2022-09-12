@@ -1,5 +1,24 @@
 basePath: /
 definitions:
+  core.Order:
+    properties:
+      accrual:
+        type: number
+      number:
+        maxLength: 20
+        type: string
+      processed_at:
+        type: string
+      status:
+        type: string
+      uploaded_at:
+        type: string
+      usm:
+        type: number
+    required:
+    - number
+    - usm
+    type: object
   core.User:
     properties:
       login:
@@ -66,6 +85,114 @@ paths:
       summary: Test
       tags:
       - Test
+  /api/user/balance:
+    get:
+      consumes:
+      - text/plain
+      description: check client balance
+      operationId: get_balance
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: no content
+          schema:
+            type: int
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: GetBalance
+      tags:
+      - Balance
+  /api/user/balance/withdraw:
+    post:
+      consumes:
+      - application/json
+      description: Withdraw user balance
+      parameters:
+      - description: some description
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/core.Order'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: no content
+          schema:
+            type: int
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "402":
+          description: Payment Required
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: WithdrawBalance
+      tags:
+      - Withdraw
+  /api/user/balance/withdrawals:
+    get:
+      consumes:
+      - text/plain
+      description: check client WithdrawalsBalance
+      operationId: get_WithdrawalsBalance
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: no content
+          schema:
+            type: int
+        "204":
+          description: no content
+          schema:
+            type: int
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: WithdrawalsBalance
+      tags:
+      - WithdrawalsBalance
   /api/user/login:
     post:
       consumes:

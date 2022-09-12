@@ -31,20 +31,20 @@ func (h *Handler) UserIdentity(next echo.HandlerFunc) echo.HandlerFunc {
 			return errResponse(c, http.StatusUnauthorized, "token is empty")
 		}
 
-		userId, err := h.services.Authorization.ParseToken(headerParts[1])
+		userID, err := h.services.Authorization.ParseToken(headerParts[1])
 		if err != nil {
 			return errResponse(c, http.StatusUnauthorized, err.Error())
 		}
 
-		pkg.InfoPrint("middleware", "ok", "userid: ", userId)
+		pkg.InfoPrint("middleware", "ok", "userid: ", userID)
 		// Добавляю ID пользователя в контекст
-		c.Set(userCtx, userId)
+		c.Set(userCtx, userID)
 
 		return next(c)
 	}
 }
 
-func getUserId(c echo.Context) (int, error) {
+func getUserID(c echo.Context) (int, error) {
 	id := c.Get(userCtx)
 
 	idInt, ok := id.(int)

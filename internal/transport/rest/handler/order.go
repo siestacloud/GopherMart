@@ -25,7 +25,8 @@ import (
 func (h *Handler) CreateOrder() echo.HandlerFunc {
 
 	return func(c echo.Context) error {
-		userID, err := getUserId(c)
+		pkg.InfoPrint("transport", "new request", "/api/user/orders")
+		userID, err := getUserID(c)
 		if err != nil {
 			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
 			return errResponse(c, http.StatusInternalServerError, err.Error()) // в контексте нет id пользователя
@@ -47,12 +48,19 @@ func (h *Handler) CreateOrder() echo.HandlerFunc {
 		if err := h.services.Accrual.GetOrderAccrual(&order); err != nil {
 			return errResponse(c, http.StatusBadRequest, err.Error())
 		}
-		// * проверяю заказ по алг луна и добавляю в бд (связывая с клиентом)
+
+		if order.Status == "" {
+			order.Status = "NEW"
+		}
+
+		// * проверка номера заказа по алгоритму Луна
+		if err := pkg.Valid(order.Number); err != nil {
+			pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
+			return errResponse(c, http.StatusUnprocessableEntity, err.Error())
+		}
+
+		// * проверяю заказ  и добавляю в бд (связывая с клиентом)
 		if err := h.services.Order.Create(userID, order); err != nil {
-			if strings.Contains(err.Error(), "lune") {
-				pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
-				return errResponse(c, http.StatusUnprocessableEntity, err.Error())
-			}
 			if strings.Contains(err.Error(), "user already have order") {
 				pkg.InfoPrint("transport", "ok", err)
 				return c.NoContent(http.StatusOK)
@@ -63,6 +71,11 @@ func (h *Handler) CreateOrder() echo.HandlerFunc {
 			}
 			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
 			return errResponse(c, http.StatusInternalServerError, "internal server error")
+		}
+
+		// * получаю информацию о расчете начислений баллов лояльности (внешнее api)
+		if err := h.services.Balance.UpdateCurrent(userID, &order); err != nil {
+			return errResponse(c, http.StatusBadRequest, err.Error())
 		}
 
 		pkg.InfoPrint("transport", "accepted", order.Number)
@@ -85,7 +98,9 @@ func (h *Handler) CreateOrder() echo.HandlerFunc {
 // @Router /api/user/orders [get]
 func (h *Handler) GetOrders() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userID, err := getUserId(c)
+		pkg.InfoPrint("transport", "new request", "/api/user/orders")
+
+		userID, err := getUserID(c)
 		if err != nil {
 			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
 			return errResponse(c, http.StatusInternalServerError, err.Error()) // в контексте нет id пользователя

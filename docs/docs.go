@@ -69,6 +69,175 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/user/balance": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "check client balance",
+                "consumes": [
+                    "text/plain"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Balance"
+                ],
+                "summary": "GetBalance",
+                "operationId": "get_balance",
+                "responses": {
+                    "200": {
+                        "description": "no content",
+                        "schema": {
+                            "type": "int"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/balance/withdraw": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Withdraw user balance",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Withdraw"
+                ],
+                "summary": "WithdrawBalance",
+                "parameters": [
+                    {
+                        "description": "some description",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/core.Order"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "no content",
+                        "schema": {
+                            "type": "int"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "402": {
+                        "description": "Payment Required",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/balance/withdrawals": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "check client WithdrawalsBalance",
+                "consumes": [
+                    "text/plain"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "WithdrawalsBalance"
+                ],
+                "summary": "WithdrawalsBalance",
+                "operationId": "get_WithdrawalsBalance",
+                "responses": {
+                    "200": {
+                        "description": "no content",
+                        "schema": {
+                            "type": "int"
+                        }
+                    },
+                    "204": {
+                        "description": "no content",
+                        "schema": {
+                            "type": "int"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/user/login": {
             "post": {
                 "description": "login",
@@ -327,6 +496,34 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "core.Order": {
+            "type": "object",
+            "required": [
+                "number",
+                "usm"
+            ],
+            "properties": {
+                "accrual": {
+                    "type": "number"
+                },
+                "number": {
+                    "type": "string",
+                    "maxLength": 20
+                },
+                "processed_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "uploaded_at": {
+                    "type": "string"
+                },
+                "usm": {
+                    "type": "number"
+                }
+            }
+        },
         "core.User": {
             "type": "object",
             "required": [
