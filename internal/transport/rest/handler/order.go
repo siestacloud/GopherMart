@@ -45,9 +45,9 @@ func (h *Handler) CreateOrder() echo.HandlerFunc {
 			return errResponse(c, http.StatusUnprocessableEntity, "order format failure")
 		}
 		// * получаю информацию о расчете начислений баллов лояльности (внешнее api)
-		// if err := h.services.Accrual.GetOrderAccrual(&order); err != nil {
-		// 	return errResponse(c, http.StatusBadRequest, err.Error())
-		// }
+		if err := h.services.Accrual.GetOrderAccrual(&order); err != nil {
+			return errResponse(c, http.StatusBadRequest, err.Error())
+		}
 
 		if order.Status == "" {
 			order.Status = "NEW"
