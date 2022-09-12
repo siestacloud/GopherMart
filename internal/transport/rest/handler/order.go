@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/siestacloud/gopherMart/internal/core"
@@ -45,8 +46,12 @@ func (h *Handler) CreateOrder() echo.HandlerFunc {
 			return errResponse(c, http.StatusUnprocessableEntity, "order format failure")
 		}
 		// * получаю информацию о расчете начислений баллов лояльности (внешнее api)
-		if err := h.services.Accrual.GetOrderAccrual(&order); err != nil {
-			return errResponse(c, http.StatusBadRequest, err.Error())
+		// if err := h.services.Accrual.GetOrderAccrual(&order); err != nil {
+		// 	return errResponse(c, http.StatusBadRequest, err.Error())
+		// }
+		order.CreateTime.String = time.Now().Format(time.RFC3339)
+		if order.Status == "" {
+			order.Status = "NEW"
 		}
 		// * проверяю заказ по алг луна и добавляю в бд (связывая с клиентом)
 		if err := h.services.Order.Create(userID, order); err != nil {

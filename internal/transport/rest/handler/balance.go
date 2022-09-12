@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/siestacloud/gopherMart/internal/core"
 	"github.com/siestacloud/gopherMart/pkg"
 )
 
@@ -58,8 +60,8 @@ type withdrawInput struct {
 // @Description Withdraw user balance
 // @Accept  json
 // @Produce  json
-// @Param input WithdrawInput  true "some description"
-// @Success 200{int} int "no content"
+// @Param input body core.Order  true "some description"
+// @Success 200 {int} int "no content"
 // @Failure 401,402,422 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
@@ -72,20 +74,24 @@ func (h *Handler) WithdrawBalance() echo.HandlerFunc {
 			pkg.ErrPrint("transport", http.StatusUnauthorized, err)
 			return errResponse(c, http.StatusUnauthorized, err.Error()) // в контексте нет id пользователя
 		}
-
 		var input withdrawInput
+		var order core.Order
+
 		if err := c.Bind(&input); err != nil {
 			pkg.ErrPrint("transport", http.StatusBadRequest, err)
 			return errResponse(c, http.StatusBadRequest, "bind body failure")
 		}
-		fmt.Println("ORDER  ", input.Order)
-
-		if err := pkg.Valid(input.Order); err != nil {
+		order.Number = input.Order
+		order.Sum = input.Sum
+		order.WithdrawnTime.String = time.Now().Format(time.RFC3339)
+		fmt.Println("ORDER  ", order)
+		// * проверка номера заказа по алгоритму Луна
+		if err := pkg.Valid(order.Number); err != nil {
 			pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
-			return errResponse(c, http.StatusUnprocessableEntity, "invalid order number")
+			return errResponse(c, http.StatusUnprocessableEntity, err.Error())
 		}
-
-		if err := h.services.Withdrawal(userID, input.Sum); err != nil {
+		// * списываю баллы с баланса клиента
+		if err := h.services.Withdrawal(userID, order.Sum); err != nil {
 			if strings.Contains(err.Error(), "there are not enough points on the balance") {
 				pkg.ErrPrint("transport", http.StatusPaymentRequired, err)
 				return errResponse(c, http.StatusPaymentRequired, err.Error())
@@ -94,6 +100,19 @@ func (h *Handler) WithdrawBalance() echo.HandlerFunc {
 			return errResponse(c, http.StatusInternalServerError, "unable withdraw balls from balance")
 		}
 
+		// * проверяю заказ со списанием по алг луна и добавляю в бд (связывая с клиентом)
+		if err := h.services.Order.Create(userID, order); err != nil {
+			if strings.Contains(err.Error(), "user already have order") {
+				pkg.InfoPrint("transport", "ok", err)
+				return c.NoContent(http.StatusOK)
+			}
+			if strings.Contains(err.Error(), "another user order") {
+				pkg.ErrPrint("transport", http.StatusConflict, err)
+				return errResponse(c, http.StatusConflict, err.Error())
+			}
+			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
+			return errResponse(c, http.StatusInternalServerError, "internal server error")
+		}
 		pkg.InfoPrint("transport", "accepted", userID)
 		return c.NoContent(http.StatusOK)
 	}
@@ -122,16 +141,21 @@ func (h *Handler) WithdrawalsBalance() echo.HandlerFunc {
 			return errResponse(c, http.StatusInternalServerError, err.Error()) // в контексте нет id пользователя
 		}
 
-		userBalance, err := h.services.Balance.Get(userID)
+		resultList := []core.Order{}
+		orderList, err := h.services.GetListOrders(userID)
 		if err != nil {
 			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
 			return errResponse(c, http.StatusInternalServerError, "internal server error")
 		}
 
+		for _, order := range orderList {
+			if order.Sum != 0 {
+				resultList = append(resultList, order)
+			}
+		}
+
 		c.Request().Header.Set("Content-Type", "application/json")
-
-		pkg.InfoPrint("transport", "OK", userBalance)
-		return c.NoContent(http.StatusOK)
-
+		pkg.InfoPrint("transport", "OK", resultList)
+		return c.JSON(http.StatusOK, resultList)
 	}
 }

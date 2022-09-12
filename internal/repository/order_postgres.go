@@ -31,8 +31,8 @@ func (o *OrderPostgres) Create(userId int, order core.Order) error {
 		return err
 	}
 	var id int
-	createListQuery := fmt.Sprintf("INSERT INTO %s (user_order,status,create_time) VALUES ($1,$2,$3) RETURNING id", ordersTable)
-	row := tx.QueryRow(createListQuery, order.Number, order.Status, order.CreateTime)
+	createListQuery := fmt.Sprintf("INSERT INTO %s (user_order,status,sum,create_time,withdrawn_time) VALUES ($1,$2,$3,$4,$5) RETURNING id", ordersTable)
+	row := tx.QueryRow(createListQuery, order.Number, order.Status, order.Sum, order.CreateTime, order.WithdrawnTime)
 	if err := row.Scan(&id); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err

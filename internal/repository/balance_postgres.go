@@ -21,7 +21,7 @@ func NewBalancePostgres(db *sqlx.DB) *BalancePostgres {
 	}
 }
 
-// Create транзакция. Создаю баланс в базу и связывую с новым клиентом
+// Create транзакция. Создаю баланс в базе и связывую с новым клиентом
 // * метод используется при авторизации нового клиента
 func (o *BalancePostgres) Create(userId int) error {
 	if o.db == nil {

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"log"
@@ -11,11 +12,13 @@ import (
 )
 
 const (
-	usersTable       = "users"
-	ordersTable      = "orders"
-	balanceTable     = "balance"
-	userOrderTable   = "users_orders"
-	userBalanceTable = "users_balance"
+	usersTable        = "users"
+	ordersTable       = "orders"
+	balanceTable      = "balance"
+	withdrawTable     = "withdraw"
+	userOrderTable    = "users_orders"
+	userBalanceTable  = "users_balance"
+	userWithdrawTable = "users_withdraw"
 )
 
 type Config struct {
@@ -46,7 +49,7 @@ func NewPostgresDB(urlDB string) (*sqlx.DB, error) {
 		log.Fatal(err)
 	}
 	// делаем запрос
-	if err := createTable(db, ordersTable, "CREATE TABLE orders (id serial not null unique,user_order bigint not null unique, status varchar(255) not null,create_time timestamp);"); err != nil {
+	if err := createTable(db, ordersTable, "CREATE TABLE orders (id serial not null unique,user_order bigint not null unique, status varchar(255) not null,sum numeric not null,create_time timestamp,withdrawn_time timestamp NULL);"); err != nil {
 		log.Fatal(err)
 	}
 	// делаем запрос
@@ -61,13 +64,10 @@ func NewPostgresDB(urlDB string) (*sqlx.DB, error) {
 	if err := createTable(db, userBalanceTable, "CREATE TABLE users_balance (id serial not null unique,user_id int references users (id) on delete cascade not null,balance_id int references balance (id) on delete cascade not null);"); err != nil {
 		log.Fatal(err)
 	}
-
 	return db, nil
 }
 
-//
-
-// "postgres://postgres:qwerty@localhost:5432/postgres?sslmode=disable"
+// * "postgres://postgres:qwerty@localhost:5432/postgres?sslmode=disable"
 
 func createTable(db *sqlx.DB, nameTable, query string) error {
 
@@ -90,4 +90,14 @@ func createTable(db *sqlx.DB, nameTable, query string) error {
 	}
 
 	return nil
+}
+
+func NewNullString(s string) sql.NullString {
+	if len(s) == 0 {
+		return sql.NullString{}
+	}
+	return sql.NullString{
+		String: s,
+		Valid:  true,
+	}
 }
