@@ -47,9 +47,10 @@ func (h *Handler) GetBalance() echo.HandlerFunc {
 	}
 }
 
-type withdrawInput struct {
-	Order string  `json:"order" validate:"required"`
-	Sum   float64 `json:"sum" validate:"required"`
+type withdraw struct {
+	Order       string  `json:"order" validate:"required"`
+	Sum         float64 `json:"sum" validate:"required"`
+	ProcessedAt string  `json:"processed_at"`
 }
 
 // * Запрос на списание средств
@@ -73,7 +74,7 @@ func (h *Handler) WithdrawBalance() echo.HandlerFunc {
 			pkg.ErrPrint("transport", http.StatusUnauthorized, err)
 			return errResponse(c, http.StatusUnauthorized, err.Error()) // в контексте нет id пользователя
 		}
-		var input withdrawInput
+		var input withdraw
 		var order core.Order
 
 		if err := c.Bind(&input); err != nil {
@@ -140,7 +141,7 @@ func (h *Handler) WithdrawalsBalance() echo.HandlerFunc {
 			return errResponse(c, http.StatusInternalServerError, err.Error()) // в контексте нет id пользователя
 		}
 
-		resultList := []core.Order{}
+		resultList := []withdraw{}
 		orderList, err := h.services.GetListOrders(userID)
 		if err != nil {
 			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
@@ -149,15 +150,14 @@ func (h *Handler) WithdrawalsBalance() echo.HandlerFunc {
 
 		for _, order := range orderList {
 			if order.Sum != 0 {
-				order.WithdrawnTime = order.CreateTime
-				order.CreateTime = ""
-				resultList = append(resultList, order)
+				resultList = append(resultList, withdraw{
+					Order:       order.Number,
+					Sum:         order.Sum,
+					ProcessedAt: order.CreateTime,
+				})
 			}
 		}
-
 		c.Request().Header.Set("Content-Type", "application/json")
-
-		pkg.InfoPrint("transport", "orderlist", orderList)
 		pkg.InfoPrint("transport", "reslist", resultList)
 		return c.JSON(http.StatusOK, resultList)
 	}
