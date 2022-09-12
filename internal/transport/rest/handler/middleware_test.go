@@ -124,7 +124,7 @@ func TestHandler_userIdentity(t *testing.T) {
 	}
 }
 
-func TestgetUserID(t *testing.T) {
+func TestGetUserID(t *testing.T) {
 	var getContext = func(id interface{}) *echo.Context {
 		e := echo.New()
 		rec := httptest.NewRecorder()
