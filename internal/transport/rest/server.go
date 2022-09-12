@@ -118,11 +118,12 @@ func (s *Server) cfgRouter() {
 
 	// *  GET /api/user/balance 			 — Получение текущего баланса пользователя
 	// *  POST /api/user/balance/withdraw    — Запрос на списание средств
-	// *  GET /api/user/balance/withdrawals  — Получение информации о выводе средств
 	balance := user.Group("/balance")
 	balance.Use(s.h.UserIdentity) // JWT token auth
 	balance.GET("", s.h.GetBalance())
 	balance.POST("/withdraw", s.h.WithdrawBalance())
-	balance.GET("/withdrawals", s.h.WithdrawalsBalance())
 
+	// *  GET /api/user/withdrawals  — Получение информации о выводе средств
+	withdrawals := user.Group("/withdrawals")
+	withdrawals.GET("", s.h.WithdrawalsBalance())
 }
