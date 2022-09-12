@@ -125,6 +125,6 @@ func (s *Server) cfgRouter() {
 
 	// *  GET /api/user/withdrawals  					— Получение информации о выводе средств;
 	withdrawals := user.Group("/withdrawals")
-	balance.Use(s.h.UserIdentity) //! доступ ограничен JWT token
+	withdrawals.Use(s.h.UserIdentity) //! доступ ограничен JWT token
 	withdrawals.GET("", s.h.WithdrawalsBalance())
 }
