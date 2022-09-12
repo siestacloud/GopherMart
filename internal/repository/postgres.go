@@ -49,7 +49,7 @@ func NewPostgresDB(urlDB string) (*sqlx.DB, error) {
 		log.Fatal(err)
 	}
 	// делаем запрос
-	if err := createTable(db, ordersTable, "CREATE TABLE orders (id serial not null unique,user_order bigint not null unique, status varchar(255) not null,sum numeric not null,create_time timestamp,withdrawn_time timestamp NULL);"); err != nil {
+	if err := createTable(db, ordersTable, "CREATE TABLE orders (id serial not null unique,user_order bigint not null unique, status varchar(255) not null,sum numeric not null,update_time timestamp);"); err != nil {
 		log.Fatal(err)
 	}
 	// делаем запрос

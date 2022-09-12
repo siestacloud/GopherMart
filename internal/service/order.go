@@ -30,15 +30,12 @@ func NewOrderService(repo repository.Order) *OrderService {
 //Create проверка номера заказа по алгоритму ЛУНА и сохранение его в базе (с привязкой к конкретному пользователю)
 func (o *OrderService) Create(userID int, order core.Order) error {
 
-	// * проверка номера заказа по алгоритму Луна
-	if err := pkg.Valid(order.Number); err != nil {
-		pkg.WarnPrint("service", "lune alg err", err)
-		return err
-	}
-
 	userDB, err := o.repo.GetUserByOrder(order.Number) // * попытка определить клиента по номеру заказа
 	if err != nil {
 		pkg.WarnPrint("service", "get user by order", err)
+
+		order.CreateTime = time.Now().Format(time.RFC3339)
+		order.WithdrawnTime = time.Now().Format(time.RFC3339)
 
 		if err = o.repo.Create(userID, order); err != nil { // * клиент c таким номером не был найден, заказ сохраняется в бд
 			return err
@@ -63,8 +60,8 @@ func (o *OrderService) GetListOrders(userID int) ([]core.Order, error) {
 		return nil, err
 	}
 	sort.Slice(list, func(i, j int) bool {
-		ti, _ := time.Parse(time.RFC3339, list[i].CreateTime.String)
-		tj, _ := time.Parse(time.RFC3339, list[j].CreateTime.String)
+		ti, _ := time.Parse(time.RFC3339, list[i].CreateTime)
+		tj, _ := time.Parse(time.RFC3339, list[j].CreateTime)
 		return ti.Before(tj)
 	})
 	pkg.InfoPrint("service", "OK", list)

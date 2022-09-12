@@ -31,8 +31,8 @@ func (o *OrderPostgres) Create(userId int, order core.Order) error {
 		return err
 	}
 	var id int
-	createListQuery := fmt.Sprintf("INSERT INTO %s (user_order,status,sum,create_time,withdrawn_time) VALUES ($1,$2,$3,$4,$5) RETURNING id", ordersTable)
-	row := tx.QueryRow(createListQuery, order.Number, order.Status, order.Sum, order.CreateTime, order.WithdrawnTime)
+	createListQuery := fmt.Sprintf("INSERT INTO %s (user_order,status,sum,update_time) VALUES ($1,$2,$3,$4) RETURNING id", ordersTable)
+	row := tx.QueryRow(createListQuery, order.Number, order.Status, order.Sum, NewNullString(order.CreateTime))
 	if err := row.Scan(&id); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
@@ -78,7 +78,7 @@ func (o *OrderPostgres) GetListOrders(userID int) ([]core.Order, error) {
 		return nil, errors.New("database are not connected")
 	}
 	orderList := []core.Order{}
-	query := fmt.Sprintf(`SELECT user_order, status, create_time FROM %s `, ordersTable)
+	query := fmt.Sprintf(`SELECT user_order, status, sum, update_time FROM %s `, ordersTable)
 	if err := o.db.Select(&orderList, query); err != nil {
 		pkg.ErrPrint("repository", 204, err)
 		return nil, err

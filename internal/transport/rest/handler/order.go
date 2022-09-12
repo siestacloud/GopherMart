@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/siestacloud/gopherMart/internal/core"
@@ -49,16 +48,19 @@ func (h *Handler) CreateOrder() echo.HandlerFunc {
 		// if err := h.services.Accrual.GetOrderAccrual(&order); err != nil {
 		// 	return errResponse(c, http.StatusBadRequest, err.Error())
 		// }
-		order.CreateTime.String = time.Now().Format(time.RFC3339)
+
 		if order.Status == "" {
 			order.Status = "NEW"
 		}
-		// * проверяю заказ по алг луна и добавляю в бд (связывая с клиентом)
+
+		// * проверка номера заказа по алгоритму Луна
+		if err := pkg.Valid(order.Number); err != nil {
+			pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
+			return errResponse(c, http.StatusUnprocessableEntity, err.Error())
+		}
+
+		// * проверяю заказ  и добавляю в бд (связывая с клиентом)
 		if err := h.services.Order.Create(userID, order); err != nil {
-			if strings.Contains(err.Error(), "lune") {
-				pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
-				return errResponse(c, http.StatusUnprocessableEntity, err.Error())
-			}
 			if strings.Contains(err.Error(), "user already have order") {
 				pkg.InfoPrint("transport", "ok", err)
 				return c.NoContent(http.StatusOK)
