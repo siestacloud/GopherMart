@@ -15,7 +15,7 @@ type Authorization interface {
 }
 
 type Order interface {
-	Create(userId int, order core.Order) error
+	Create(userID int, order core.Order) error
 	GetUserByOrder(orderID string) (int, error)
 	GetListOrders(userID int) ([]core.Order, error)
 }
@@ -25,7 +25,7 @@ type Accrual interface {
 }
 
 type Balance interface {
-	Create(userId int) error
+	Create(userID int) error
 	Get(userID int) (*core.Balance, error)
 	UpdateCurrent(balance *core.Balance) error
 	UpdateWithdrawn(balance *core.Balance) error

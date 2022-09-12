@@ -26,7 +26,7 @@ type Accrual interface {
 }
 
 type Balance interface {
-	Create(userId int) error
+	Create(userID int) error
 	Get(userID int) (*core.Balance, error)
 	UpdateCurrent(userID int, order *core.Order) error
 	Withdrawal(userID int, orderNumber float64) error

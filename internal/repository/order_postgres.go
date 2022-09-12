@@ -22,7 +22,7 @@ func NewOrderPostgres(db *sqlx.DB) *OrderPostgres {
 }
 
 // Create транзакция. Добавляю заказ в базу и связывую с клиентом
-func (o *OrderPostgres) Create(userId int, order core.Order) error {
+func (o *OrderPostgres) Create(userID int, order core.Order) error {
 	if o.db == nil {
 		return errors.New("database are not connected")
 	}
@@ -40,7 +40,7 @@ func (o *OrderPostgres) Create(userId int, order core.Order) error {
 		return err
 	}
 	createUsersListQuery := fmt.Sprintf("INSERT INTO %s (user_id, order_id) VALUES ($1, $2)", userOrderTable)
-	_, err = tx.Exec(createUsersListQuery, userId, id)
+	_, err = tx.Exec(createUsersListQuery, userID, id)
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err

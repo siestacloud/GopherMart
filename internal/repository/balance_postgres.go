@@ -23,11 +23,11 @@ func NewBalancePostgres(db *sqlx.DB) *BalancePostgres {
 
 // Create транзакция. Создаю баланс в базе и связывую с новым клиентом
 // * метод используется при авторизации нового клиента
-func (o *BalancePostgres) Create(userId int) error {
-	if o.db == nil {
+func (b *BalancePostgres) Create(userID int) error {
+	if b.db == nil {
 		return errors.New("database are not connected")
 	}
-	tx, err := o.db.Begin()
+	tx, err := b.db.Begin()
 	if err != nil {
 		return err
 	}
@@ -41,7 +41,7 @@ func (o *BalancePostgres) Create(userId int) error {
 		return err
 	}
 	usersBalanceQuery := fmt.Sprintf("INSERT INTO %s (user_id, balance_id) VALUES ($1, $2)", userBalanceTable)
-	_, err = tx.Exec(usersBalanceQuery, userId, id)
+	_, err = tx.Exec(usersBalanceQuery, userID, id)
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
@@ -52,20 +52,20 @@ func (o *BalancePostgres) Create(userId int) error {
 }
 
 // Get получить текущее количество баллов клиента и общее количество использованных баллов за все время
-func (m *BalancePostgres) Get(userID int) (*core.Balance, error) {
-	if m.db == nil {
+func (b *BalancePostgres) Get(userID int) (*core.Balance, error) {
+	if b.db == nil {
 		return nil, errors.New("database are not connected")
 	}
 
 	var balance core.Balance
 	query := fmt.Sprintf(`SELECT balance_id FROM %s  WHERE user_id = $1`, userBalanceTable)
-	if err := m.db.Get(&balance.ID, query, userID); err != nil {
+	if err := b.db.Get(&balance.ID, query, userID); err != nil {
 		pkg.ErrPrint("repository", 500, err)
 		return nil, err
 	}
 
 	query = fmt.Sprintf(`SELECT current,withdrawn FROM %s  WHERE id = $1`, balanceTable)
-	if err := m.db.Get(&balance, query, balance.ID); err != nil {
+	if err := b.db.Get(&balance, query, balance.ID); err != nil {
 		pkg.ErrPrint("repository", 500, err)
 		return nil, err
 	}
@@ -73,12 +73,12 @@ func (m *BalancePostgres) Get(userID int) (*core.Balance, error) {
 }
 
 // UpdateCurrent обновить текущее количество баллов клиента
-func (m *BalancePostgres) UpdateCurrent(balance *core.Balance) error {
-	if m.db == nil {
+func (b *BalancePostgres) UpdateCurrent(balance *core.Balance) error {
+	if b.db == nil {
 		return errors.New("database are not connected")
 	}
 	balanceQuery := fmt.Sprintf("UPDATE %s SET current = %v WHERE id = %v ", balanceTable, balance.Current, balance.ID)
-	_, err := m.db.Exec(balanceQuery)
+	_, err := b.db.Exec(balanceQuery)
 	if err != nil {
 		pkg.ErrPrint("repository", 500, err)
 		return err
@@ -88,12 +88,12 @@ func (m *BalancePostgres) UpdateCurrent(balance *core.Balance) error {
 }
 
 // UpdateWithdrawn обновить общее количество использованных баллов клиента за все время
-func (m *BalancePostgres) UpdateWithdrawn(balance *core.Balance) error {
-	if m.db == nil {
+func (b *BalancePostgres) UpdateWithdrawn(balance *core.Balance) error {
+	if b.db == nil {
 		return errors.New("database are not connected")
 	}
 	balanceQuery := fmt.Sprintf("UPDATE %s SET withdrawn = %v WHERE id = %v ", balanceTable, balance.Withdrawn, balance.ID)
-	_, err := m.db.Exec(balanceQuery)
+	_, err := b.db.Exec(balanceQuery)
 	if err != nil {
 		pkg.ErrPrint("repository", 500, err)
 		return err
