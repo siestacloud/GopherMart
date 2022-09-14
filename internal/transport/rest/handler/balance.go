@@ -10,7 +10,7 @@ import (
 	"github.com/siestacloud/gopherMart/pkg"
 )
 
-// * Получение текущего баланса пользователя
+// *  GET /api/user/balance 			 			— Получение текущего баланса пользователя;
 // @Summary GetBalance
 // @Security ApiKeyAuth
 // @Tags Balance
@@ -87,10 +87,11 @@ func (h *Handler) WithdrawBalance() echo.HandlerFunc {
 		fmt.Println("ORDER  ", order)
 		// * проверка номера заказа по алгоритму Луна
 		if err := pkg.Valid(order.Number); err != nil {
+			fmt.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", order.Number)
 			pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
 			return errResponse(c, http.StatusUnprocessableEntity, err.Error())
 		}
-		// * проверяю заказ со списанием по алг луна и добавляю в бд (связывая с клиентом)
+		// * проверяю заказ со списанием и добавляю в бд (связывая с клиентом)
 		if err := h.services.Order.Create(userID, order); err != nil {
 			if strings.Contains(err.Error(), "user already have order") {
 				pkg.ErrPrint("transport", http.StatusUnprocessableEntity, err)
@@ -130,11 +131,9 @@ func (h *Handler) WithdrawBalance() echo.HandlerFunc {
 // @Failure 401 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /api/user/balance/withdrawals [get]
+// @Router /api/user/withdrawals [get]
 func (h *Handler) WithdrawalsBalance() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		pkg.InfoPrint("transport", "new request", "/api/user/balance/withdrawals")
-
 		userID, err := getUserID(c)
 		if err != nil {
 			pkg.ErrPrint("transport", http.StatusInternalServerError, err)

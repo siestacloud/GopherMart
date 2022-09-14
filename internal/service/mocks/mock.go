@@ -193,3 +193,83 @@ func (mr *MockAccrualMockRecorder) GetOrderAccrual(order interface{}) *gomock.Ca
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderAccrual", reflect.TypeOf((*MockAccrual)(nil).GetOrderAccrual), order)
 }
+
+// MockBalance is a mock of Balance interface
+type MockBalance struct {
+	ctrl     *gomock.Controller
+	recorder *MockBalanceMockRecorder
+}
+
+// MockBalanceMockRecorder is the mock recorder for MockBalance
+type MockBalanceMockRecorder struct {
+	mock *MockBalance
+}
+
+// NewMockBalance creates a new mock instance
+func NewMockBalance(ctrl *gomock.Controller) *MockBalance {
+	mock := &MockBalance{ctrl: ctrl}
+	mock.recorder = &MockBalanceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockBalance) EXPECT() *MockBalanceMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method
+func (m *MockBalance) Create(userID int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", userID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Create indicates an expected call of Create
+func (mr *MockBalanceMockRecorder) Create(userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockBalance)(nil).Create), userID)
+}
+
+// Get mocks base method
+func (m *MockBalance) Get(userID int) (*core.Balance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", userID)
+	ret0, _ := ret[0].(*core.Balance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get
+func (mr *MockBalanceMockRecorder) Get(userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockBalance)(nil).Get), userID)
+}
+
+// UpdateCurrent mocks base method
+func (m *MockBalance) UpdateCurrent(userID int, order *core.Order) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateCurrent", userID, order)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateCurrent indicates an expected call of UpdateCurrent
+func (mr *MockBalanceMockRecorder) UpdateCurrent(userID, order interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCurrent", reflect.TypeOf((*MockBalance)(nil).UpdateCurrent), userID, order)
+}
+
+// Withdrawal mocks base method
+func (m *MockBalance) Withdrawal(userID int, orderNumber float64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Withdrawal", userID, orderNumber)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Withdrawal indicates an expected call of Withdrawal
+func (mr *MockBalanceMockRecorder) Withdrawal(userID, orderNumber interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Withdrawal", reflect.TypeOf((*MockBalance)(nil).Withdrawal), userID, orderNumber)
+}

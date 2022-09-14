@@ -13,19 +13,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestHandler_userIdentity тесты для Middleware
+// * тестирование логики добавления в контекст запроса ID клиента из заголовка Authorization)
 func TestHandler_userIdentity(t *testing.T) {
 	// Init Test Table
 	type mockBehavior func(r *service_mocks.MockAuthorization, token string)
 
 	testTable := []struct {
-		name                 string
-		headerName           string
-		headerValue          string
-		token                string
-		mockBehavior         mockBehavior
-		expectedStatusCode   int
-		expectedResponseBody string
+		name                 string       // * имя теста
+		headerName           string       // * имя заголовка
+		headerValue          string       // * значение заголовка
+		token                string       // * токен
+		mockBehavior         mockBehavior // * функция заглушка
+		expectedStatusCode   int          // * ожидаемый статус код ответа
+		expectedResponseBody string       // * ожидаемое тело ответа (userid from token)
 	}{
+		// ! проверка позитивных сценариев
 		{
 			name:        "Ok",
 			headerName:  "Authorization",
@@ -37,7 +40,8 @@ func TestHandler_userIdentity(t *testing.T) {
 			expectedStatusCode:   200,
 			expectedResponseBody: "1" + "\n",
 		},
-		{
+		// ! проверка негативных сценариев
+		{ // * отсутствует header Authorization
 			name:                 "Invalid Header Name",
 			headerName:           "",
 			headerValue:          "Bearer token",
@@ -46,7 +50,7 @@ func TestHandler_userIdentity(t *testing.T) {
 			expectedStatusCode:   401,
 			expectedResponseBody: `{"message":"empty auth header"}` + "\n",
 		},
-		{
+		{ // * неправильное значение header
 			name:                 "Invalid Header Value",
 			headerName:           "Authorization",
 			headerValue:          "Bearr token",
@@ -55,7 +59,7 @@ func TestHandler_userIdentity(t *testing.T) {
 			expectedStatusCode:   401,
 			expectedResponseBody: `{"message":"invalid auth header"}` + "\n",
 		},
-		{
+		{ // * отсутствует токен
 			name:                 "Empty Token",
 			headerName:           "Authorization",
 			headerValue:          "Bearer ",
@@ -64,7 +68,7 @@ func TestHandler_userIdentity(t *testing.T) {
 			expectedStatusCode:   401,
 			expectedResponseBody: `{"message":"token is empty"}` + "\n",
 		},
-		{
+		{ // * неправильный токен (в тестовом сценарии мок функция возвращает ошибку)
 			name:        "Parse Error",
 			headerName:  "Authorization",
 			headerValue: "Bearer token",
@@ -85,7 +89,7 @@ func TestHandler_userIdentity(t *testing.T) {
 		// * тесты запускаются параллельно в отдельных горутинах
 		t.Run(test.name, func(t *testing.T) {
 
-			// в теле тест функции инициализируем зависимости
+			// в теле тест функции инициализирую зависимости
 			// * создаем контроллер мока слоя сервис
 			// * вызываем метод finish (оссобенность библиотеки
 			// * для каждого теста нужно создавать контроллер и финишировать его по выполнению теста)
@@ -96,10 +100,10 @@ func TestHandler_userIdentity(t *testing.T) {
 			auth := service_mocks.NewMockAuthorization(c)
 
 			// * в данном тестовом сценарии ожидаем получить
-			// * вызов метода сервиса и получить в качестве аргумента данную структуру пользователя
+			// * вызов метода сервиса и получить в качестве аргумента токен из заголовка
 			test.mockBehavior(auth, test.token)
 
-			// * инициализируем слой service, имплементируем интерфейс Authorization моком auth
+			// * инициализируем слой service, имплементирую интерфейс Authorization моком auth
 			services := &service.Service{Authorization: auth}
 			handler := NewHandler(services)
 
@@ -109,8 +113,9 @@ func TestHandler_userIdentity(t *testing.T) {
 				id := c.Get(userCtx).(int)
 				return c.JSON(http.StatusOK, id)
 			})
-			e.Use(handler.UserIdentity) // JWT token auth
+			e.Use(handler.UserIdentity) //  тестируемая middleware (JWT token auth)
 
+			// * формирую новый post запрос от клиента
 			rec := httptest.NewRecorder()
 			req := httptest.NewRequest(http.MethodPost, "/", nil)
 			req.Header.Set(test.headerName, test.headerValue)
@@ -124,7 +129,10 @@ func TestHandler_userIdentity(t *testing.T) {
 	}
 }
 
+// TestGetUserID
+// * тестирование логики получения уникального ID клиента из контекста запроса
 func TestGetUserID(t *testing.T) {
+	// * getContext возвращает контекст для (используется в тестовых сценариях)
 	var getContext = func(id interface{}) *echo.Context {
 		e := echo.New()
 		rec := httptest.NewRecorder()
@@ -134,21 +142,22 @@ func TestGetUserID(t *testing.T) {
 		return &ctx
 	}
 
+	// * тестовые сценарии
 	testTable := []struct {
-		name       string
-		ctx        *echo.Context
-		id         int
+		name       string        // * имя теста
+		ctx        *echo.Context // * контекст
 		shouldFail bool
+		expectedID int // * ID клиента
 	}{
 		{
 			name:       "Ok",
 			ctx:        getContext(1),
-			id:         1,
+			expectedID: 1,
 			shouldFail: false,
 		},
 		{
-			ctx:        getContext("invalid_user_id"),
 			name:       "Empty",
+			ctx:        getContext("invalid_user_id_pcjwpwx"),
 			shouldFail: true,
 		},
 	}
@@ -162,7 +171,7 @@ func TestGetUserID(t *testing.T) {
 				assert.NoError(t, err)
 			}
 
-			assert.Equal(t, id, test.id)
+			assert.Equal(t, id, test.expectedID)
 		})
 	}
 }

@@ -18,7 +18,7 @@ import (
 )
 
 func TestHandler_SignUp(t *testing.T) {
-	type mockBehavior func(r *service_mocks.MockAuthorization, user core.User)
+	type mockBehavior func(r *service_mocks.MockAuthorization, b *service_mocks.MockBalance, user core.User)
 	// тестовая таблица
 	tests := []struct {
 		name                 string       // * имя теста
@@ -38,12 +38,12 @@ func TestHandler_SignUp(t *testing.T) {
 				Login:    "poul2",
 				Password: "pass",
 			},
-			// * создаем поведение для объекта мока
-			// * указываем что ожидаем получить вызов CreateUser именно с той структурой user которую передаем
-			// * и этот метод должен вернуть ID и nil в качестве ошибки
-			mockBehavior: func(r *service_mocks.MockAuthorization, user core.User) {
+			// * создаем поведение для объектов мока
+			// * ожидаем получить вызов методов и соответствующий результат
+			mockBehavior: func(r *service_mocks.MockAuthorization, b *service_mocks.MockBalance, user core.User) {
 				r.EXPECT().CreateUser(user).Return(1, nil)
 				r.EXPECT().GenerateToken(user.Login, user.Password).Return("qazwsxedC", nil)
+				b.EXPECT().Create(1).Return(nil)
 			},
 			expectedToken: "Bearer qazwsxedC",
 			// * указываем ожидаемый статус код и тело ответа
@@ -59,7 +59,7 @@ func TestHandler_SignUp(t *testing.T) {
 				Login:    "poul2",
 				Password: "pass",
 			},
-			mockBehavior: func(r *service_mocks.MockAuthorization, user core.User) {
+			mockBehavior: func(r *service_mocks.MockAuthorization, b *service_mocks.MockBalance, user core.User) {
 				r.EXPECT().CreateUser(user).Return(0, errors.New("login busy"))
 			},
 			expectedStatusCode:   409,
@@ -71,7 +71,7 @@ func TestHandler_SignUp(t *testing.T) {
 			name:                 "Empty fields",
 			inputBody:            `{"login": "","password": ""}`,
 			inputUser:            core.User{},
-			mockBehavior:         func(r *service_mocks.MockAuthorization, user core.User) {}, // * вызывается в этом тесте
+			mockBehavior:         func(r *service_mocks.MockAuthorization, b *service_mocks.MockBalance, user core.User) {}, // * вызывается в этом тесте
 			expectedToken:        "",
 			expectedStatusCode:   400,
 			expectedResponseBody: `{"message":"validate failure"}` + "\n",
@@ -81,7 +81,7 @@ func TestHandler_SignUp(t *testing.T) {
 			name:                 "Empty client field",
 			inputBody:            `{"login": "","password": "passw@@ord"}`,
 			inputUser:            core.User{},
-			mockBehavior:         func(r *service_mocks.MockAuthorization, user core.User) {}, // * не вызывается в этом тесте
+			mockBehavior:         func(r *service_mocks.MockAuthorization, b *service_mocks.MockBalance, user core.User) {}, // * не вызывается в этом тесте
 			expectedToken:        "",
 			expectedStatusCode:   400,
 			expectedResponseBody: `{"message":"validate failure"}` + "\n",
@@ -91,7 +91,7 @@ func TestHandler_SignUp(t *testing.T) {
 			name:                 "Empty password field",
 			inputBody:            `{"login": "","password": ""}`,
 			inputUser:            core.User{},
-			mockBehavior:         func(r *service_mocks.MockAuthorization, user core.User) {}, // * не вызывается в этом тесте
+			mockBehavior:         func(r *service_mocks.MockAuthorization, b *service_mocks.MockBalance, user core.User) {}, // * не вызывается в этом тесте
 			expectedToken:        "",
 			expectedStatusCode:   400,
 			expectedResponseBody: `{"message":"validate failure"}` + "\n",
@@ -101,7 +101,7 @@ func TestHandler_SignUp(t *testing.T) {
 			name:                 "No fields in client body request",
 			inputBody:            `{"another1": "someval1","another2": "someval2"}`,
 			inputUser:            core.User{},
-			mockBehavior:         func(r *service_mocks.MockAuthorization, user core.User) {}, // * не вызывается в этом тесте
+			mockBehavior:         func(r *service_mocks.MockAuthorization, b *service_mocks.MockBalance, user core.User) {}, // * не вызывается в этом тесте
 			expectedToken:        "",
 			expectedStatusCode:   400,
 			expectedResponseBody: `{"message":"validate failure"}` + "\n",
@@ -113,10 +113,7 @@ func TestHandler_SignUp(t *testing.T) {
 				Login:    "poul2",
 				Password: "pass",
 			},
-			// * создаем поведение для объекта мока
-			// * указываем что ожидаем получить вызов CreateUser именно с той структурой user которую передаем
-			// * и этот метод должен вернуть ID и nil в качестве ошибки
-			mockBehavior: func(r *service_mocks.MockAuthorization, user core.User) {
+			mockBehavior: func(r *service_mocks.MockAuthorization, b *service_mocks.MockBalance, user core.User) {
 				r.EXPECT().CreateUser(user).Return(0, errors.New("some internal error"))
 			},
 			// * указываем ожидаемый статус код и тело ответа
@@ -142,13 +139,14 @@ func TestHandler_SignUp(t *testing.T) {
 
 			// * создаем мок слоя сервис, передаем контроллер как аргумент
 			auth := service_mocks.NewMockAuthorization(c)
+			balance := service_mocks.NewMockBalance(c)
 
 			// * в данном тестовом сценарии ожидаем получить
 			// * вызов метода сервиса и получить в качестве аргумента данную структуру пользователя
-			test.mockBehavior(auth, test.inputUser)
+			test.mockBehavior(auth, balance, test.inputUser)
 
 			// * инициализируем слой service, имплементируем интерфейс Authorization моком auth
-			services := &service.Service{Authorization: auth}
+			services := &service.Service{Authorization: auth, Balance: balance}
 			handler := NewHandler(services)
 
 			// * инициализация тестового ендпоитна
@@ -284,7 +282,7 @@ func TestHandler_SignIn(t *testing.T) {
 			auth := service_mocks.NewMockAuthorization(c)
 
 			// * в данном тестовом сценарии ожидаем получить
-			// * вызов метода сервиса и получить в качестве аргумента данную структуру пользователя
+			// * вызов метода сервиса
 			test.mockBehavior(auth, test.inputUser)
 
 			// * инициализируем слой service, имплементируем интерфейс Authorization моком auth

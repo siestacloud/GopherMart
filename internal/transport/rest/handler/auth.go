@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// 	* `POST /api/user/register` 					— регистрация пользователя;
 // @Summary SignUp
 // @Tags Auth
 // @Description create account
@@ -36,6 +37,7 @@ func (h *Handler) SignUp() echo.HandlerFunc {
 			return errResponse(c, http.StatusBadRequest, "validate failure")
 		}
 
+		// * авторизация
 		userID, err := h.services.Authorization.CreateUser(input)
 		if err != nil {
 			if strings.Contains(err.Error(), "login busy") {
@@ -47,6 +49,7 @@ func (h *Handler) SignUp() echo.HandlerFunc {
 			return errResponse(c, http.StatusInternalServerError, "internal server error")
 		}
 
+		// * аутентификация
 		token, err := h.services.Authorization.GenerateToken(input.Login, input.Password)
 		if err != nil {
 
@@ -54,7 +57,7 @@ func (h *Handler) SignUp() echo.HandlerFunc {
 			return errResponse(c, http.StatusInternalServerError, "internal server error")
 
 		}
-		// * создаю баланс для нового пользователя
+		// * создание баланса для нового клиента
 		if err := h.services.Balance.Create(userID); err != nil {
 			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
 			return errResponse(c, http.StatusInternalServerError, "internal server error")
@@ -70,6 +73,7 @@ type signInInput struct {
 	Password string `json:"password" validate:"required"`
 }
 
+// 	* `POST /api/user/login` 						— аутентификация пользователя;
 // @Summary SignIn
 // @Tags Auth
 // @Description login
