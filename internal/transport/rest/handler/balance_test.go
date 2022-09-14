@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestHandler_GetBalance тестирование логики обработки GET запроса от клиента для: получения текещего баланса клиента;
+// TestHandler_GetBalance тестирование логики обработки GET запроса от клиента для: получения текущего баланса клиента;
 func TestHandler_GetBalance(t *testing.T) {
 	type mockBehavior func(b *service_mocks.MockBalance, UserID int)
 	// тестовая таблица
@@ -127,7 +127,7 @@ func TestHandler_WithdrawBalance(t *testing.T) {
 			expectedResponseBody: "",
 		},
 		// ! проверка негативных сценариев
-
+		// todo добавить тесты
 	}
 
 	// В цикле итерируемся по тестовой таблице
@@ -170,6 +170,78 @@ func TestHandler_WithdrawBalance(t *testing.T) {
 			s.Set(userCtx, test.userID)
 
 			q := handler.WithdrawBalance()
+			if assert.NoError(t, q(s)) {
+				assert.Equal(t, test.expectedStatusCode, rec.Code)
+				assert.Equal(t, test.expectedResponseBody, rec.Body.String())
+			}
+		})
+	}
+}
+
+// TestHandler_WithdrawalsBalance тестирование логики обработки GET запроса от клиента для: Получение информации о выводе средств;
+func TestHandler_WithdrawalsBalance(t *testing.T) {
+	type mockBehavior func(o *service_mocks.MockOrder, UserID int)
+	// тестовая таблица
+	tests := []struct {
+		name                 string       // * имя теста
+		userID               int          // * уникальный id клиента (вытаскивается из jwt-токена в middleware)
+		mockBehavior         mockBehavior // * функция
+		expectedStatusCode   int          // * ожидаемый статус код
+		expectedResponseBody string       // * ожидаемое тело ответа
+	}{
+		//  тест кейсы
+		// ! проверка позитивного сценария
+		{
+			// * получение информации о выводе средств
+			name:   "get balance ok",
+			userID: 1,
+			mockBehavior: func(o *service_mocks.MockOrder, UserID int) {
+				o.EXPECT().GetListOrders(UserID).Return([]core.Order{{Number: "2377225624", Sum: 210, CreateTime: "2022-09-14T15:21:16+03:00"}}, nil)
+			},
+			expectedStatusCode:   200,
+			expectedResponseBody: `[{"order":"2377225624","sum":210,"processed_at":"2022-09-14T15:21:16+03:00"}]` + "\n",
+		},
+		// ! проверка негативных сценариев
+
+	}
+
+	// В цикле итерируемся по тестовой таблице
+	for _, test := range tests {
+
+		// * вызываем метод RUN у объекта t)
+		// * передаем имя теста и функцию
+		// * тесты запускаются параллельно в отдельных горутинах
+		t.Run(test.name, func(t *testing.T) {
+
+			// в теле тест функции инициализируем зависимости
+			// * создаем контроллер мока слоя сервис
+			// * вызываем метод finish (оссобенность библиотеки
+			// * для каждого теста нужно создавать контроллер и финишировать его по выполнению теста)
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			// * создаем мок слоя сервис, передаем контроллер как аргумент
+			order := service_mocks.NewMockOrder(c)
+
+			// * в данном тестовом сценарии ожидаем получить
+			// * вызов метода сервиса и получить
+			test.mockBehavior(order, test.userID)
+
+			// * инициализируем слой service, имплементируем интерфейс Balance
+			services := &service.Service{Order: order}
+			handler := NewHandler(services)
+
+			// * инициализация тестового ендпоитна
+			e := echo.New()
+
+			e.Validator = pkg.NewCustomValidator(validator.New())
+
+			rec := httptest.NewRecorder()
+			req := httptest.NewRequest(http.MethodGet, "/api/user/withdrawals", nil)
+			s := e.NewContext(req, rec)
+			s.Set(userCtx, test.userID)
+
+			q := handler.WithdrawalsBalance()
 			if assert.NoError(t, q(s)) {
 				assert.Equal(t, test.expectedStatusCode, rec.Code)
 				assert.Equal(t, test.expectedResponseBody, rec.Body.String())

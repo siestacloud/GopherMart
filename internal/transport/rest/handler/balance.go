@@ -131,11 +131,9 @@ func (h *Handler) WithdrawBalance() echo.HandlerFunc {
 // @Failure 401 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /api/user/balance/withdrawals [get]
+// @Router /api/user/withdrawals [get]
 func (h *Handler) WithdrawalsBalance() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		pkg.InfoPrint("transport", "new request", "/api/user/balance/withdrawals")
-
 		userID, err := getUserID(c)
 		if err != nil {
 			pkg.ErrPrint("transport", http.StatusInternalServerError, err)
