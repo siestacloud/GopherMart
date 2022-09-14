@@ -30,6 +30,7 @@ type Config struct {
 	SSLMode  string
 }
 
+// NewPostgresDB создание всех необходимых таблиц в БД
 func NewPostgresDB(urlDB string) (*sqlx.DB, error) {
 	if urlDB == "" {
 		return nil, errors.New("url not set")

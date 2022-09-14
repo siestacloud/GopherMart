@@ -185,59 +185,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/user/balance/withdrawals": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "check client WithdrawalsBalance",
-                "consumes": [
-                    "text/plain"
-                ],
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "WithdrawalsBalance"
-                ],
-                "summary": "WithdrawalsBalance",
-                "operationId": "get_WithdrawalsBalance",
-                "responses": {
-                    "200": {
-                        "description": "no content",
-                        "schema": {
-                            "type": "int"
-                        }
-                    },
-                    "204": {
-                        "description": "no content",
-                        "schema": {
-                            "type": "int"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
-                        }
-                    },
-                    "default": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/api/user/login": {
             "post": {
                 "description": "login",
@@ -493,14 +440,66 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/user/withdrawals": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "check client WithdrawalsBalance",
+                "consumes": [
+                    "text/plain"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "WithdrawalsBalance"
+                ],
+                "summary": "WithdrawalsBalance",
+                "operationId": "get_WithdrawalsBalance",
+                "responses": {
+                    "200": {
+                        "description": "no content",
+                        "schema": {
+                            "type": "int"
+                        }
+                    },
+                    "204": {
+                        "description": "no content",
+                        "schema": {
+                            "type": "int"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
         "core.Order": {
             "type": "object",
             "required": [
-                "number",
-                "usm"
+                "number"
             ],
             "properties": {
                 "accrual": {
@@ -516,11 +515,11 @@ const docTemplate = `{
                 "status": {
                     "type": "string"
                 },
+                "sum": {
+                    "type": "number"
+                },
                 "uploaded_at": {
                     "type": "string"
-                },
-                "usm": {
-                    "type": "number"
                 }
             }
         },

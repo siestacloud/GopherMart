@@ -11,13 +11,12 @@ definitions:
         type: string
       status:
         type: string
+      sum:
+        type: number
       uploaded_at:
         type: string
-      usm:
-        type: number
     required:
     - number
-    - usm
     type: object
   core.User:
     properties:
@@ -159,40 +158,6 @@ paths:
       summary: WithdrawBalance
       tags:
       - Withdraw
-  /api/user/balance/withdrawals:
-    get:
-      consumes:
-      - text/plain
-      description: check client WithdrawalsBalance
-      operationId: get_WithdrawalsBalance
-      produces:
-      - text/plain
-      responses:
-        "200":
-          description: no content
-          schema:
-            type: int
-        "204":
-          description: no content
-          schema:
-            type: int
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/handler.errorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/handler.errorResponse'
-        default:
-          description: ""
-          schema:
-            $ref: '#/definitions/handler.errorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: WithdrawalsBalance
-      tags:
-      - WithdrawalsBalance
   /api/user/login:
     post:
       consumes:
@@ -360,6 +325,40 @@ paths:
       summary: SignUp
       tags:
       - Auth
+  /api/user/withdrawals:
+    get:
+      consumes:
+      - text/plain
+      description: check client WithdrawalsBalance
+      operationId: get_WithdrawalsBalance
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: no content
+          schema:
+            type: int
+        "204":
+          description: no content
+          schema:
+            type: int
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: WithdrawalsBalance
+      tags:
+      - WithdrawalsBalance
 securityDefinitions:
   ApiKeyAuth:
     in: header
