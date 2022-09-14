@@ -12,13 +12,11 @@ import (
 )
 
 const (
-	usersTable        = "users"
-	ordersTable       = "orders"
-	balanceTable      = "balance"
-	withdrawTable     = "withdraw"
-	userOrderTable    = "users_orders"
-	userBalanceTable  = "users_balance"
-	userWithdrawTable = "users_withdraw"
+	usersTable       = "users"
+	ordersTable      = "orders"
+	balanceTable     = "balance"
+	userOrderTable   = "users_orders"
+	userBalanceTable = "users_balance"
 )
 
 type Config struct {
