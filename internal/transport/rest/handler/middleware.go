@@ -14,6 +14,7 @@ const (
 	userCtx             = "userId"
 )
 
+// UserIdentity добавляет в контекст запроса ID клиента из заголовка Authorization
 func (h *Handler) UserIdentity(next echo.HandlerFunc) echo.HandlerFunc {
 
 	return func(c echo.Context) error {
@@ -21,7 +22,7 @@ func (h *Handler) UserIdentity(next echo.HandlerFunc) echo.HandlerFunc {
 		if header == "" {
 			return errResponse(c, http.StatusUnauthorized, "empty auth header")
 		}
-
+		// * пример заголовка "Bearer caFEEKcnaaXSLA..."
 		headerParts := strings.Split(header, " ")
 		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
 			return errResponse(c, http.StatusUnauthorized, "invalid auth header")
@@ -37,13 +38,12 @@ func (h *Handler) UserIdentity(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		pkg.InfoPrint("middleware", "ok", "userid: ", userID)
-		// Добавляю ID пользователя в контекст
-		c.Set(userCtx, userID)
-
+		c.Set(userCtx, userID) // * Добавляю ID клиента в контекст
 		return next(c)
 	}
 }
 
+// getUserID возвращает ID клиента из контекста запроса
 func getUserID(c echo.Context) (int, error) {
 	id := c.Get(userCtx)
 
