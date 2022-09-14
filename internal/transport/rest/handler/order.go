@@ -118,9 +118,6 @@ func (h *Handler) GetOrders() echo.HandlerFunc {
 			if err := h.services.Accrual.GetOrderAccrual(&orderList[i]); err != nil {
 				pkg.ErrPrint("transport", http.StatusInternalServerError, err, v)
 			}
-			if orderList[i].Status == "" { // todo del
-				orderList[i].Status = "PROCESSING"
-			}
 		}
 
 		c.Request().Header.Set("Content-Type", "application/json")

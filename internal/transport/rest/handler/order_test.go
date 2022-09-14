@@ -133,7 +133,7 @@ func TestHandler_CreateOrder(t *testing.T) {
 			expectedResponseBody: `{"message":"another user order"}` + "\n",
 		},
 		{
-			// * внутренняя ошибка сервера
+			// * внутренняя ошибка
 			name:       "Internal server error",
 			userID:     1,
 			inputBody:  `4561261212345467`,
@@ -187,7 +187,6 @@ func TestHandler_CreateOrder(t *testing.T) {
 			s.Set(userCtx, test.userID)
 
 			q := handler.CreateOrder()
-			// * Проверка корректности JWT-токена в заголовке и статуса ответа
 			if assert.NoError(t, q(s)) {
 				assert.Equal(t, test.expectedStatusCode, rec.Code)
 				assert.Equal(t, test.expectedResponseBody, rec.Body.String())
@@ -204,7 +203,6 @@ func TestHandler_GetOrders(t *testing.T) {
 	tests := []struct {
 		name                 string       // * имя теста
 		userID               int          // * уникальный id клиента (вытаскивается из jwt-токена в middleware)
-		inputBody            string       // * тело запроса
 		inputOrder           core.Order   // * структура пользователя (который передается в мок метода сервиса)
 		mockBehavior         mockBehavior // * функция
 		expectedStatusCode   int          // * ожидаемый статус код
@@ -217,7 +215,6 @@ func TestHandler_GetOrders(t *testing.T) {
 			// * новый номер заказа принят в обработку
 			name:       "Order accepted",
 			userID:     1,
-			inputBody:  `4561261212345467`,
 			inputOrder: core.Order{Number: "4561261212345467", Status: "PROCESSED"},
 			mockBehavior: func(r *service_mocks.MockOrder, a *service_mocks.MockAccrual, UserID int, order core.Order) {
 				r.EXPECT().GetListOrders(UserID).Return([]core.Order{order}, nil)
@@ -228,25 +225,22 @@ func TestHandler_GetOrders(t *testing.T) {
 		},
 		// ! проверка негативных сценариев
 		{
-
-			// * новый номер заказа принят в обработку
-			name:       "Order accepted",
+			// * внутрення ошибка на уровне service или на уровне repository
+			name:       "Some Internal Error",
 			userID:     1,
-			inputBody:  `4561261212345467`,
-			inputOrder: core.Order{Number: "4561261212345467", Status: "PROCESSED"},
+			inputOrder: core.Order{},
 			mockBehavior: func(r *service_mocks.MockOrder, a *service_mocks.MockAccrual, UserID int, order core.Order) {
-				r.EXPECT().GetListOrders(UserID).Return([]core.Order{order}, nil)
-				a.EXPECT().GetOrderAccrual(&order).Return(nil)
+				r.EXPECT().GetListOrders(UserID).Return(nil, errors.New("some error from service layer..."))
 			},
-			expectedStatusCode:   200,
-			expectedResponseBody: `[{"number":"4561261212345467","status":"PROCESSED"}]` + "\n",
+			expectedStatusCode:   500,
+			expectedResponseBody: `{"message":"internal server error"}` + "\n",
 		},
 	}
 
 	// В цикле итерируемся по тестовой таблице
 	for _, test := range tests {
 
-		// * вызываем метод RUN у объекта t )
+		// * вызываем метод RUN у объекта t)
 		// * передаем имя теста и функцию
 		// * тесты запускаются параллельно в отдельных горутинах
 		t.Run(test.name, func(t *testing.T) {
@@ -276,13 +270,12 @@ func TestHandler_GetOrders(t *testing.T) {
 			e.Validator = pkg.NewCustomValidator(validator.New())
 
 			rec := httptest.NewRecorder()
-			req := httptest.NewRequest(http.MethodPost, "/api/user/orders", strings.NewReader(test.inputBody))
+			req := httptest.NewRequest(http.MethodGet, "/api/user/orders", nil)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			s := e.NewContext(req, rec)
 			s.Set(userCtx, test.userID)
 
 			q := handler.GetOrders()
-			// * Проверка корректности JWT-токена в заголовке и статуса ответа
 			if assert.NoError(t, q(s)) {
 				assert.Equal(t, test.expectedStatusCode, rec.Code)
 				assert.Equal(t, test.expectedResponseBody, rec.Body.String())
